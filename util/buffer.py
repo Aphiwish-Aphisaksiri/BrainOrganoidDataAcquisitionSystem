@@ -3,7 +3,6 @@ import numpy as np
 class Buffer():
     def __init__(self, numChannel, numSample):
         self.__data = np.zeros((numChannel, numSample), dtype=np.float64)
-
         self.__isUpdated = False
 
     def addData(self, data):
@@ -15,6 +14,14 @@ class Buffer():
         if data.shape != self.__data.shape:
             raise ValueError(f"Input data must have shape {self.__data.shape}, but got {data.shape}")
         self.__data = np.array(data)
+        self.setFlagDataUpdated()
+
+    def addMultipleData(self, data):
+        num_points = data.shape[1]
+        if num_points > self.__data.shape[1]:
+            raise ValueError(f"Input data has more points ({num_points}) than buffer can hold ({self.__data.shape[1]})")
+        self.__data = np.roll(self.__data, -num_points, axis=1)
+        self.__data[:, -num_points:] = data
         self.setFlagDataUpdated()
 
     def getData(self):

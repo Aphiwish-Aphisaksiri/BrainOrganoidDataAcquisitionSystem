@@ -38,5 +38,12 @@ class TestBuffer(unittest.TestCase):
         self.assertTrue(buffer.isDataUpdated())
         print("Buffer - Set flag data updated test passed")
 
+    def test_add_multiple_data(self):
+        buffer = Buffer(2, 5)
+        buffer.addMultipleData(np.array([[1, 2, 3], [4, 5, 6]]))
+        self.assertTrue(buffer.isDataUpdated())
+        self.assertEqual(buffer.getData().tolist(), [[0.0, 0.0, 1.0, 2.0, 3.0], [0.0, 0.0, 4.0, 5.0, 6.0]])
+        print("Buffer - Add multiple data test passed")
+
 if __name__ == '__main__':
     unittest.main()
