@@ -1,7 +1,8 @@
 import serial
 import numpy as np
+from util.abstractthread import abstractthread
 
-class Daq():
+class Daq(abstractthread):
     def __init__(self):
         self.__channelsNumber = 8
         self.__bytesPerSample = 3 # 24 bits
@@ -45,5 +46,12 @@ class Daq():
         return dataType, length, data, checkSum, term
     
     def sendDataToBuffer(self):
-        
+        _, _, data, _, _ = self.readData()
+        data = data.reshape(self.__channelsNumber, -1)
+        self.__rawDataBuffer.addMultipleData(data)
 
+    def update(self):
+        self.sendDataToBuffer()
+        
+    def assignBuffer(self, target):
+        self.__rawDataBuffer = target
