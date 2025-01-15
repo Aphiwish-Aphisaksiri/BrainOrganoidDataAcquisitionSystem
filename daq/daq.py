@@ -39,5 +39,11 @@ class Daq():
         
         return dataType_int, length_int, data_int24, checkSum_int, term_int
 
+    def readData(self):
+        self.__rawData = self.__ser.read(self.__typeByteLen + self.__lengthLen + self.__payloadLen + self.__checkSumLen + self.__termLen)
+        dataType, length, data, checkSum, term = self.convertByteArrayToData(self.__rawData)
+        return dataType, length, data, checkSum, term
+    
     def sendDataToBuffer(self):
-        pass
+        
+
