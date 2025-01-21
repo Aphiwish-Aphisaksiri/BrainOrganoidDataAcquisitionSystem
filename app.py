@@ -11,7 +11,7 @@ class App():
     def __init__(self):
         # Variables
         self.__channelsNumber = 8
-        self.__rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=800)
+        self.__rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=1000)
 
     def initializeThreads(self):
         self.__daq = Daq()
@@ -31,7 +31,7 @@ class App():
 
 
     def renderApp(self):
-        #self.__daq.startThread()
+        self.__daq.startThread()
 
         self.__filter.startThread()
 

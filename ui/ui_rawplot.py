@@ -10,12 +10,12 @@ import numpy as np
 import dearpygui.dearpygui as dpg
 from util.abstractthread import abstractthread
 
-NUM_SAMPLE_TO_SHOW = 800
+NUM_SAMPLE_TO_SHOW = 1000
 
 class UiRawPlot(abstractthread):
     def __init__(self):
         super().__init__()
-        self.setThreadFrequency(10000)
+        self.setThreadFrequency(30)
         self.__channelsNumber = 8
 
         self.__x = list(range(0, NUM_SAMPLE_TO_SHOW)) # 80000 samples = 10 seconds
