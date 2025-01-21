@@ -49,7 +49,7 @@ class UiRawPlot(abstractthread):
 
         if time.time() - self.starttime >= 1:
             self.starttime = time.time()
-            print(self.count)
+            #print(self.count)
             self.count = 0
 
     def fitGraph(self):
