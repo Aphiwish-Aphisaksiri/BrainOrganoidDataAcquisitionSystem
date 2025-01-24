@@ -10,7 +10,7 @@ import numpy as np
 import dearpygui.dearpygui as dpg
 from util.abstractthread import abstractthread
 
-NUM_SAMPLE_TO_SHOW = 1000
+NUM_SAMPLE_TO_SHOW = 10000
 
 class UiRawPlot(abstractthread):
     def __init__(self):
@@ -45,7 +45,7 @@ class UiRawPlot(abstractthread):
             lineHandler = self.__uiLineSeriesHandlerList[i]
             dpg.set_value(lineHandler, [self.__x, self.__buffer[i]])
             y_min, y_max = np.min(self.__buffer[i]), np.max(self.__buffer[i])
-            dpg.set_axis_limits(f"CH{i+1}", y_min, y_max)
+            dpg.set_axis_limits(f"CH{i+1}", y_min*1.1, y_max*1.1)
 
         if time.time() - self.starttime >= 1:
             self.starttime = time.time()
