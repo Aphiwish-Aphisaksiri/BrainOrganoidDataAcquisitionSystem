@@ -22,6 +22,11 @@ class Daq(abstractthread):
         self.__startTime = time.time()
         self.__packageCount = 0
 
+        self.setThreadFrequency(16)
+
+        # FOR DEBUGGING
+        self.__prev_byte_count = 0
+
         self.connect()
 
     def connect(self):
@@ -30,9 +35,12 @@ class Daq(abstractthread):
                 self.__ser = serial.Serial(
                     self.__port,
                     self.__baudrate,
-                    timeout=1,
+                    timeout=0,
                     rtscts=True,
-                    dsrdtr=True
+                    dsrdtr=True,
+                    parity="N",
+                    stopbits=1,
+                    bytesize=8
                 )
                 self.__ser.reset_input_buffer()  # Clear the input buffer
                 print(f"Connected to {self.__port}")
