@@ -1,16 +1,17 @@
 import serial
-import numpy as np
 import time
-import struct
+import numpy as np
 from util.abstractthread import abstractthread
+from util.buffer import Buffer
+from util.config import CHANNELS_NUMBER, BYTES_PER_SAMPLE, HEADER_LEN, TERM_LEN, UNCONVERTED_RAW_DATA_BUFFER_SIZE
 
 class Daq(abstractthread):
     def __init__(self):
         super().__init__()
-        self.__channelsNumber = 8
-        self.__bytesPerSample = 3  # 24 bits
-        self.__headerLen = 1
-        self.__termLen = 1
+        self.__channelsNumber = CHANNELS_NUMBER
+        self.__bytesPerSample = BYTES_PER_SAMPLE
+        self.__headerLen = HEADER_LEN
+        self.__termLen = TERM_LEN
         self.__payloadLen = self.__channelsNumber * self.__bytesPerSample
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
@@ -48,54 +49,18 @@ class Daq(abstractthread):
                 print(f"Failed to connect to {self.__port}: {e}")
                 time.sleep(self.__reconnect_interval)
 
-
-    
-    def convertByteArrayToData(self, byteArray):
-        Vref = 2.4
-        Gain = 12
-        multiplier = (2 * (Vref / Gain)) / (2 ** 24)
-    
-        header = byteArray[0]  # first byte is the data type
-        data = byteArray[1:-1]  # the data is from the second byte to the second last byte
-        term = byteArray[-1]  # last byte is the terminator
-    
-        header_int = header  # header is already an integer
-    
-        # Unpack the data using struct
-        data_int24 = np.array([struct.unpack('>i', b'\x00' + data[i:i+3])[0] for i in range(0, len(data), 3)])
-    
-        # Convert to signed 24-bit integer
-        data_int24 = np.where(data_int24 >= 2**23, data_int24 - 2**24, data_int24)
-    
-        # Convert to voltage
-        data_voltage = data_int24 * multiplier
-    
-        # Reshape the data to maintain the structure of 8 channels
-        data_voltage = data_voltage.reshape(self.__channelsNumber, -1)
-    
-        term_int = term  # term is already an integer
-    
-        return header_int, data_voltage, term_int
-
     def readData(self):
         try:
-            self.__rawData += self.__ser.read(self.__ser.in_waiting)
-            packages = []
-            while len(self.__rawData) >= self.__packageLen:
-                if self.__rawData[0] != 0xAA:
-                    self.__rawData = self.__rawData[1:]
-                    continue
-                package = self.__rawData[:self.__packageLen]
-                self.__rawData = self.__rawData[self.__packageLen:]
+            if self.__ser.in_waiting > 0:
+                self.__rawData += self.__ser.read(self.__ser.in_waiting)
 
-                header = package[0]
-                term = package[-1]
+            # Convert rawData to a numpy array and pad with zeros to length UNCONVERTED_RAW_DATA_BUFFER_SIZE
+            rawDataArray = np.frombuffer(self.__rawData, dtype=np.uint8)
+            if len(rawDataArray) < UNCONVERTED_RAW_DATA_BUFFER_SIZE:
+                rawDataArray = np.pad(rawDataArray, (0, UNCONVERTED_RAW_DATA_BUFFER_SIZE - len(rawDataArray)), 'constant')
 
-                if header == 0xAA and term == 0xFF and len(package) == self.__packageLen:
-                    packages.append(package)
-                    self.__packageCount += 1
-                else:
-                    print(f"Invalid package: header={header}, term={term}, length={len(package)}")
+            # Reshape to match the buffer shape
+            rawDataArray = rawDataArray.reshape((self.__channelsNumber, -1))
 
             currentTime = time.time()
             if currentTime - self.__startTime >= 1:
@@ -103,23 +68,20 @@ class Daq(abstractthread):
                 self.__packageCount = 0
                 self.__startTime = currentTime
 
-            return packages
+            return rawDataArray
         except serial.SerialException as e:
             print(f"Serial error: {e}")
             self.__ser.close()
             self.__ser = None
             self.connect()
-            return []
+            return np.zeros((self.__channelsNumber, UNCONVERTED_RAW_DATA_BUFFER_SIZE), dtype=np.uint8)
 
     def sendDataToBuffer(self):
-        packages = self.readData()
-        for package in packages:
-            header, data, term = self.convertByteArrayToData(package)
-            data = data.reshape(self.__channelsNumber, -1)
-            self.__rawDataBuffer.addMultipleData(data)
+        rawDataArray = self.readData()
+        self.__unconvertedRawDataBuffer.addBatchData(rawDataArray)
 
     def update(self):
         self.sendDataToBuffer()
 
     def assignBuffer(self, target):
-        self.__rawDataBuffer = target
+        self.__unconvertedRawDataBuffer = target
