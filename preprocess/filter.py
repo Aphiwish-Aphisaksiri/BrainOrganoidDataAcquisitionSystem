@@ -10,7 +10,7 @@ class Filter(abstractthread):
     def __init__(self):
         super().__init__()
 
-    def assignBuffer(self, target):
+    def assignInletBuffer(self, target):
         self.__rawDataBuffer = target
 
     def update(self):
