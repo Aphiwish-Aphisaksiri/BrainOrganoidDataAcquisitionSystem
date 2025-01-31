@@ -51,22 +51,11 @@ class Daq(abstractthread):
 
     def readData(self):
         try:
+            rawDataArray = np.zeros((1, UNCONVERTED_RAW_DATA_BUFFER_SIZE), dtype=np.uint8)
             if self.__ser.in_waiting > 0:
-                self.__rawData += self.__ser.read(self.__ser.in_waiting)
-
-            # Convert rawData to a numpy array and pad with zeros to length UNCONVERTED_RAW_DATA_BUFFER_SIZE
-            rawDataArray = np.frombuffer(self.__rawData, dtype=np.uint8)
-            if len(rawDataArray) < UNCONVERTED_RAW_DATA_BUFFER_SIZE:
-                rawDataArray = np.pad(rawDataArray, (0, UNCONVERTED_RAW_DATA_BUFFER_SIZE - len(rawDataArray)), 'constant')
-
-            # Reshape to match the buffer shape
-            rawDataArray = rawDataArray.reshape((self.__channelsNumber, -1))
-
-            currentTime = time.time()
-            if currentTime - self.__startTime >= 1:
-                print(f"Packages received in the last second: {self.__packageCount}")
-                self.__packageCount = 0
-                self.__startTime = currentTime
+                serialData = self.__ser.read(self.__ser.in_waiting)
+                serialDataArray = np.frombuffer(serialData, dtype=np.uint8)
+                rawDataArray[:, :len(serialDataArray)] = serialDataArray
 
             return rawDataArray
         except serial.SerialException as e:
@@ -74,11 +63,12 @@ class Daq(abstractthread):
             self.__ser.close()
             self.__ser = None
             self.connect()
-            return np.zeros((self.__channelsNumber, UNCONVERTED_RAW_DATA_BUFFER_SIZE), dtype=np.uint8)
+            return np.zeros((1, UNCONVERTED_RAW_DATA_BUFFER_SIZE), dtype=np.uint8)
 
     def sendDataToBuffer(self):
         rawDataArray = self.readData()
-        self.__unconvertedRawDataBuffer.addBatchData(rawDataArray)
+        if rawDataArray is not None:
+            self.__unconvertedRawDataBuffer.addBatchData(rawDataArray)
 
     def update(self):
         self.sendDataToBuffer()

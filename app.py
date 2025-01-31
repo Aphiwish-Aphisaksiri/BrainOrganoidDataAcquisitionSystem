@@ -13,7 +13,7 @@ class App():
     def __init__(self):
         # Variables
         self.__channelsNumber = CHANNELS_NUMBER
-        self.__unconvertedRawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=UNCONVERTED_RAW_DATA_BUFFER_SIZE)
+        self.__unconvertedRawDataBuffer = Buffer(1, numSample=UNCONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__convertedRawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
 
     def initializeThreads(self):
