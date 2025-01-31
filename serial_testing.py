@@ -10,10 +10,17 @@ def main():
         print(f"Connected to {port}")
 
         while True:
-            if ser.in_waiting > 0:
-                serial_data = ser.read(ser.in_waiting)
-                print(serial_data)
-            time.sleep(0.0001)  # Sleep for a short time to avoid high CPU usage
+            try:
+                if ser.in_waiting > 0 and ser.is_open:
+                    serial_data = ser.read(ser.in_waiting)
+                    print(serial_data)
+                time.sleep(0.0001)  # Sleep for a short time to avoid high CPU usage
+            except serial.SerialException as e:
+                print(f"Serial error during read: {e}")
+                break
+            except OSError as e:
+                print(f"OS error during read: {e}")
+                break
 
     except serial.SerialException as e:
         print(f"Serial error: {e}")
