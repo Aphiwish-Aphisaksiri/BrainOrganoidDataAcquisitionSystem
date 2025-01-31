@@ -1,5 +1,5 @@
 import numpy as np
-import struct
+import time
 from util.abstractthread import abstractthread
 from util.config import CHANNELS_NUMBER, BYTES_PER_SAMPLE, HEADER_LEN, TERM_LEN, VREF, GAIN, UNCONVERTED_RAW_DATA_BUFFER_SIZE
 
@@ -14,6 +14,10 @@ class Converter(abstractthread):
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
         self.setThreadFrequency(32)
+
+        # FOR DEBUGGING
+        self.__startTime = time.time()
+        self.__packageCount = 0
 
     def assignInletBuffer(self, unconvertedBuffer):
         self.__unconvertedRawDataBuffer = unconvertedBuffer
@@ -51,22 +55,29 @@ class Converter(abstractthread):
     def update(self):
         if self.__unconvertedRawDataBuffer.isDataUpdated():
             unconvertedData = self.__unconvertedRawDataBuffer.getData()
+            # print(unconvertedData)
             if unconvertedData.shape == (1, UNCONVERTED_RAW_DATA_BUFFER_SIZE):
                 rawDataArray = unconvertedData.flatten()
-
-                # Remove padding (trailing zeros)
-                rawDataArray = rawDataArray[:np.argmax(rawDataArray == 0)]
+                # print(rawDataArray)
 
                 # print(rawDataArray)
                 while len(rawDataArray) >= self.__packageLen:
                     # Check for header
                     if rawDataArray[0] == 170:
                         package = rawDataArray[:self.__packageLen]
+                        #print(package)
                         rawDataArray = rawDataArray[self.__packageLen:]
                         header, data_voltage, term = self.convertByteArrayToData(package)
+                        #print(data_voltage)
                         if header is not None and data_voltage is not None and term is not None:
                             self.__rawDataBuffer.addData(data_voltage.flatten())
+                        self.__packageCount = self.__packageCount + 1
                     else:
                         rawDataArray = rawDataArray[1:]
+                currentTime = time.time()
+                if currentTime - self.__startTime >= 1:
+                    print(f"Packages received in the last second: {self.__packageCount}")
+                    self.__packageCount = 0
+                    self.__startTime = currentTime
             else:
                 print(f"Invalid unconvertedData shape: {unconvertedData.shape}")
