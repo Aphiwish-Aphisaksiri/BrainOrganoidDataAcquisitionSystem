@@ -3,6 +3,7 @@ import time
 import numpy as np
 import dearpygui.dearpygui as dpg
 from util.abstractthread import abstractthread
+from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
 
 NUM_SAMPLE_TO_SHOW = 10000
 
@@ -10,7 +11,7 @@ class UiRawPlot(abstractthread):
     def __init__(self):
         super().__init__()
         self.setThreadFrequency(30)
-        self.__channelsNumber = 8
+        self.__channelsNumber = CHANNELS_NUMBER
 
         self.__x = list(range(0, NUM_SAMPLE_TO_SHOW)) # 80000 samples = 10 seconds
         self.__buffer = np.zeros((self.__channelsNumber, NUM_SAMPLE_TO_SHOW))

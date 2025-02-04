@@ -3,15 +3,16 @@ import numpy as np
 import time
 import threading
 from util.abstractthread import abstractthread
+from util.config import CHANNELS_NUMBER, BYTES_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN
 
 class Daq(abstractthread):
     def __init__(self):
         super().__init__()
-        self.__channelsNumber = 8
-        self.__bytesPerSample = 3  # 24 bits
-        self.__headerLen = 1
-        self.__termLen = 1
-        self.__samplesPerPackage = 5
+        self.__channelsNumber = CHANNELS_NUMBER
+        self.__bytesPerSample = BYTES_PER_SAMPLE
+        self.__headerLen = HEADER_LEN
+        self.__termLen = TERM_LEN
+        self.__samplesPerPackage = SAMPLES_PER_PACKAGE
         self.__payloadLen = self.__channelsNumber * self.__bytesPerSample * self.__samplesPerPackage
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
@@ -79,9 +80,7 @@ class Daq(abstractthread):
             return []
 
     def convertByteArrayToData(self, byteArray):
-        Vref = 2.4
-        Gain = 12
-        multiplier = (2 * (Vref / Gain)) / (2 ** 24)
+        multiplier = (2 * (VREF / GAIN)) / (2 ** 24)
 
         header = byteArray[0]  # first byte is the data type
         data = byteArray[1:-1]  # the data is from the second byte to the second last byte

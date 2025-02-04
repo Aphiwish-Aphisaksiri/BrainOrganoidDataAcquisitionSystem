@@ -1,7 +1,8 @@
 import numpy as np
+from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
 
 class Buffer():
-    def __init__(self, numChannel, numSample):
+    def __init__(self, numChannel=CHANNELS_NUMBER, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE):
         self.__data = np.zeros((numChannel, numSample), dtype=np.float64)
         self.__isUpdated = False
 
