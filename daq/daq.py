@@ -1,7 +1,6 @@
 import serial
 import numpy as np
 import time
-import struct
 import threading
 from util.abstractthread import abstractthread
 
@@ -12,7 +11,8 @@ class Daq(abstractthread):
         self.__bytesPerSample = 3  # 24 bits
         self.__headerLen = 1
         self.__termLen = 1
-        self.__payloadLen = self.__channelsNumber * self.__bytesPerSample
+        self.__samplesPerPackage = 5
+        self.__payloadLen = self.__channelsNumber * self.__bytesPerSample * self.__samplesPerPackage
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
         self.__port = 'COM5'
@@ -42,35 +42,6 @@ class Daq(abstractthread):
             except serial.SerialException as e:
                 print(f"Failed to connect to {self.__port}: {e}")
                 time.sleep(self.__reconnect_interval)
-
-
-    
-    def convertByteArrayToData(self, byteArray):
-        Vref = 2.4
-        Gain = 12
-        multiplier = (2 * (Vref / Gain)) / (2 ** 24)
-    
-        header = byteArray[0]  # first byte is the data type
-        data = byteArray[1:-1]  # the data is from the second byte to the second last byte
-        term = byteArray[-1]  # last byte is the terminator
-    
-        header_int = header  # header is already an integer
-    
-        # Unpack the data using struct
-        data_int24 = np.array([struct.unpack('>i', b'\x00' + data[i:i+3])[0] for i in range(0, len(data), 3)])
-    
-        # Convert to signed 24-bit integer
-        data_int24 = np.where(data_int24 >= 2**23, data_int24 - 2**24, data_int24)
-    
-        # Convert to voltage
-        data_voltage = data_int24 * multiplier
-    
-        # Reshape the data to maintain the structure of 8 channels
-        data_voltage = data_voltage.reshape(self.__channelsNumber, -1)
-    
-        term_int = term  # term is already an integer
-    
-        return header_int, data_voltage, term_int
 
     def readData(self):
         try:
@@ -107,13 +78,37 @@ class Daq(abstractthread):
             self.connect()
             return []
 
+    def convertByteArrayToData(self, byteArray):
+        Vref = 2.4
+        Gain = 12
+        multiplier = (2 * (Vref / Gain)) / (2 ** 24)
+
+        header = byteArray[0]  # first byte is the data type
+        data = byteArray[1:-1]  # the data is from the second byte to the second last byte
+        term = byteArray[-1]  # last byte is the terminator
+
+        header_int = header  # header is already an integer
+
+        # Unpack the data using bitwise operations
+        data_int24 = np.array([(data[i] << 16) | (data[i+1] << 8) | data[i+2] for i in range(0, len(data), 3)])
+
+        # Convert to signed 24-bit integer
+        data_int24 = np.where(data_int24 >= 2**23, data_int24 - 2**24, data_int24)
+
+        # Convert to voltage
+        data_voltage = data_int24 * multiplier
+
+        # Reshape the data to maintain the structure of channels and samples
+        data_voltage = data_voltage.reshape(self.__channelsNumber, self.__samplesPerPackage)
+
+        return header_int, data_voltage, term
+
     def sendDataToBuffer(self):
         packages = self.readData()
         if packages is None:
             return
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
-            data = data.reshape(self.__channelsNumber, -1)
             self.__rawDataBuffer.addMultipleData(data)
 
     def update(self):
