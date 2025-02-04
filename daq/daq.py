@@ -2,6 +2,7 @@ import serial
 import numpy as np
 import time
 import struct
+import threading
 from util.abstractthread import abstractthread
 
 class Daq(abstractthread):
@@ -14,15 +15,17 @@ class Daq(abstractthread):
         self.__payloadLen = self.__channelsNumber * self.__bytesPerSample
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
-        self.__port = 'COM4'
-        self.__baudrate = 1460000
+        self.__port = 'COM5'
+        self.__baudrate = 1250000
         self.__reconnect_interval = 5  # seconds
         self.__ser = None
         self.__rawData = bytearray()
         self.__startTime = time.time()
         self.__packageCount = 0
 
-        self.connect()
+        self.__connect_thread = threading.Thread(target=self.connect)
+        self.__connect_thread.daemon = True
+        self.__connect_thread.start()
 
     def connect(self):
         while self.__ser is None:
@@ -71,31 +74,32 @@ class Daq(abstractthread):
 
     def readData(self):
         try:
-            self.__rawData += self.__ser.read(self.__ser.in_waiting)
-            packages = []
-            while len(self.__rawData) >= self.__packageLen:
-                if self.__rawData[0] != 0xAA:
-                    self.__rawData = self.__rawData[1:]
-                    continue
-                package = self.__rawData[:self.__packageLen]
-                self.__rawData = self.__rawData[self.__packageLen:]
+            if self.__ser is not None:
+                self.__rawData += self.__ser.read(self.__ser.in_waiting)
+                packages = []
+                while len(self.__rawData) >= self.__packageLen:
+                    if self.__rawData[0] != 0xAA:
+                        self.__rawData = self.__rawData[1:]
+                        continue
+                    package = self.__rawData[:self.__packageLen]
+                    self.__rawData = self.__rawData[self.__packageLen:]
 
-                header = package[0]
-                term = package[-1]
+                    header = package[0]
+                    term = package[-1]
 
-                if header == 0xAA and term == 0xFF and len(package) == self.__packageLen:
-                    packages.append(package)
-                    self.__packageCount += 1
-                else:
-                    print(f"Invalid package: header={header}, term={term}, length={len(package)}")
+                    if header == 0xAA and term == 0xFF and len(package) == self.__packageLen:
+                        packages.append(package)
+                        self.__packageCount += 1
+                    else:
+                        print(f"Invalid package: header={header}, term={term}, length={len(package)}")
 
-            currentTime = time.time()
-            if currentTime - self.__startTime >= 1:
-                print(f"Packages received in the last second: {self.__packageCount}")
-                self.__packageCount = 0
-                self.__startTime = currentTime
+                currentTime = time.time()
+                if currentTime - self.__startTime >= 1:
+                    print(f"Packages received in the last second: {self.__packageCount}")
+                    self.__packageCount = 0
+                    self.__startTime = currentTime
 
-            return packages
+                return packages
         except serial.SerialException as e:
             print(f"Serial error: {e}")
             self.__ser.close()
@@ -105,6 +109,8 @@ class Daq(abstractthread):
 
     def sendDataToBuffer(self):
         packages = self.readData()
+        if packages is None:
+            return
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
             data = data.reshape(self.__channelsNumber, -1)
