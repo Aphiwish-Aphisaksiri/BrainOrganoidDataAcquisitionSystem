@@ -37,7 +37,7 @@ class UiRawPlot(abstractthread):
         self.__rawDataBuffer = target
 
     def update(self):
-        if not self.__realTimePlot:
+        if self.__realTimePlot:
             self.count += 1
             self.__buffer = self.__rawDataBuffer.getData()
             for i in range(self.__channelsNumber):
