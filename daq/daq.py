@@ -22,7 +22,7 @@ class Daq(abstractthread):
         self.__ser = None
         self.__rawData = bytearray()
         self.__startTime = time.time()
-        self.__packageCount = 0
+        self.__samplesCount = 0
 
         self.__connect_thread = threading.Thread(target=self.connect)
         self.__connect_thread.daemon = True
@@ -61,14 +61,14 @@ class Daq(abstractthread):
 
                     if header == 0xAA and term == 0xFF and len(package) == self.__packageLen:
                         packages.append(package)
-                        self.__packageCount += 1
+                        self.__samplesCount += self.__samplesPerPackage
                     else:
                         print(f"Invalid package: header={header}, term={term}, length={len(package)}")
 
                 currentTime = time.time()
                 if currentTime - self.__startTime >= 1:
-                    print(f"Packages received in the last second: {self.__packageCount}")
-                    self.__packageCount = 0
+                    print(f"Samples received in the last second: {self.__samplesCount}")
+                    self.__samplesCount = 0
                     self.__startTime = currentTime
 
                 return packages
