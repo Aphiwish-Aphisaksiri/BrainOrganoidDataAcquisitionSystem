@@ -64,3 +64,22 @@ class Filter(abstractthread):
         freq = self.__notchFilter / nyquist
         b, a = iirnotch(freq, Q=30)  # Q factor of 30
         return b, a
+    
+    def setHighPassFilter(self, value):
+        self.__highPassFilter = value
+        self.__highPassB, self.__highPassA = self.__design_highpass_filter()
+        return self.__highPassFilter
+
+    def setLowPassFilter(self, value):
+        self.__lowPassFilter = value
+        self.__lowPassB, self.__lowPassA = self.__design_lowpass_filter()
+        return self.__lowPassFilter
+
+    def setNotchFilter(self, value):
+        self.__notchFilter = value
+        self.__notchB, self.__notchA = self.__design_notch_filter()
+        return self.__notchFilter
+
+    def setGain(self, value):
+        self.__gain = value
+        return self.__gain
