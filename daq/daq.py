@@ -3,17 +3,17 @@ import numpy as np
 import time
 import threading
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, BYTES_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN
+from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN
 
 class Daq(abstractthread):
     def __init__(self):
         super().__init__()
         self.__channelsNumber = CHANNELS_NUMBER
-        self.__bytesPerSample = BYTES_PER_SAMPLE
+        self.__bitsPerSample = BITS_PER_SAMPLE
         self.__headerLen = HEADER_LEN
         self.__termLen = TERM_LEN
         self.__samplesPerPackage = SAMPLES_PER_PACKAGE
-        self.__payloadLen = self.__channelsNumber * self.__bytesPerSample * self.__samplesPerPackage
+        self.__payloadLen = -(-self.__channelsNumber * self.__bitsPerSample * self.__samplesPerPackage // 8) # Weird -(-) is used to ceil the division
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
         self.__port = 'COM5'
@@ -80,26 +80,30 @@ class Daq(abstractthread):
             return []
 
     def convertByteArrayToData(self, byteArray):
-        multiplier = (2 * (VREF / GAIN)) / (2 ** 24)
-
+        multiplier = (2 * (VREF / GAIN)) / (2 ** self.__bitsPerSample)  # Adjust for the configured bit resolution
+    
         header = byteArray[0]  # first byte is the data type
         data = byteArray[1:-1]  # the data is from the second byte to the second last byte
         term = byteArray[-1]  # last byte is the terminator
-
+    
         header_int = header  # header is already an integer
-
-        # Unpack the data using bitwise operations
-        data_int24 = np.array([(data[i] << 16) | (data[i+1] << 8) | data[i+2] for i in range(0, len(data), 3)])
-
-        # Convert to signed 24-bit integer
-        data_int24 = np.where(data_int24 >= 2**23, data_int24 - 2**24, data_int24)
-
+    
+        # Convert byte array to bit array
+        bit_array = np.unpackbits(np.frombuffer(data, dtype=np.uint8))
+    
+        # Extract samples based on the configured bits per sample
+        num_samples = len(bit_array) // self.__bitsPerSample
+        data_int = np.array([int(''.join(map(str, bit_array[i*self.__bitsPerSample:(i+1)*self.__bitsPerSample])), 2) for i in range(num_samples)])
+    
+        # Convert to signed integer based on the configured bits per sample
+        data_int = np.where(data_int >= 2**(self.__bitsPerSample - 1), data_int - 2**self.__bitsPerSample, data_int)
+    
         # Convert to voltage
-        data_voltage = data_int24 * multiplier
-
+        data_voltage = data_int * multiplier
+    
         # Reshape the data to maintain the structure of channels and samples
         data_voltage = data_voltage.reshape(self.__channelsNumber, self.__samplesPerPackage)
-
+    
         return header_int, data_voltage, term
 
     def sendDataToBuffer(self):
