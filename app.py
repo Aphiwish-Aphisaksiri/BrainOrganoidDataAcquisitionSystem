@@ -13,16 +13,18 @@ class App():
         # Variables
         self.__channelsNumber = CHANNELS_NUMBER
         self.__rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+        self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
 
     def initializeThreads(self):
         self.__daq = Daq()
         self.__daq.assignBuffer(self.__rawDataBuffer)
 
         self.__filter = Filter()
-        self.__filter.assignBuffer(self.__rawDataBuffer)
+        self.__filter.assignInletBuffer(self.__rawDataBuffer)
+        self.__filter.assignOutletBuffer(self.__filteredDataBuffer)
 
-        self.__UiFilter = UiDataProc(self.__filter)
-        self.__UiFilter.assignFilter(self.__filter)
+        self.__uiFilter = UiDataProc(self.__filter)
+        self.__uiFilter.assignFilter(self.__filter)
 
         self.__mockRawData = MockRawData()
         self.__mockRawData.assignBuffer(self.__rawDataBuffer)
@@ -33,8 +35,8 @@ class App():
     def renderApp(self):
         self.__daq.startThread()
         self.__filter.startThread()
-        self.__UiFilter.render()
-        self.__UiFilter.startThread()
+        self.__uiFilter.render()
+        self.__uiFilter.startThread()
         #self.__mockRawData.startThread()
         self.__uiRawPlot.render()
         self.__uiRawPlot.startThread()
@@ -42,6 +44,6 @@ class App():
     def stopApp(self):
         self.__uiRawPlot.stopThread()
         self.__mockRawData.stopThread()
-        self.__UiFilter.stopThread()
+        self.__uiFilter.stopThread()
         self.__filter.stopThread()
         self.__daq.stopThread()
