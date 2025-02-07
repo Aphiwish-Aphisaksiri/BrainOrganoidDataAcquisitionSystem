@@ -14,5 +14,6 @@ def initUiRender(*, APPS_UI_INIT_FILE_PATH=None):
 
 def renderUi():
     dpg.show_viewport()
+    dpg.maximize_viewport()  # Maximize the viewport to the screen size
     dpg.start_dearpygui()
     dpg.destroy_context()
