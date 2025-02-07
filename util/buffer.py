@@ -25,9 +25,9 @@ class Buffer():
         self.__data[:, -num_points:] = data
         self.setFlagDataUpdated()
 
-    def getData(self):
-        self.__isUpdated = False
-        self.resetFlagDataUpdated()
+    def getData(self, reset_flag=True):
+        if reset_flag:
+            self.resetFlagDataUpdated()
         return self.__data
     
     def isDataUpdated(self):

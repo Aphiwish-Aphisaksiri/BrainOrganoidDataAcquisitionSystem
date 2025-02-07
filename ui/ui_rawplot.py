@@ -40,7 +40,7 @@ class UiRawPlot(abstractthread):
     def update(self):
         if self.__realTimePlot:
             self.count += 1
-            self.__buffer = self.__rawDataBuffer.getData()
+            self.__buffer = self.__rawDataBuffer.getData(reset_flag=False)
             for i in range(self.__channelsNumber):
                 lineHandler = self.__uiLineSeriesHandlerList[i]
                 dpg.set_value(lineHandler, [self.__x, self.__buffer[i]])
