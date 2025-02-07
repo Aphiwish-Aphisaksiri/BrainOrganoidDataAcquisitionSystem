@@ -6,6 +6,7 @@ from util.abstractthread import abstractthread
 from util.buffer import Buffer
 from ui.mockRawData import MockRawData
 from ui.ui_dataProc import UiDataProc
+from ui.ui_filteredplot import UiFilteredPlot
 from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
 
 class App():
@@ -32,6 +33,9 @@ class App():
         self.__uiRawPlot = UiRawPlot()
         self.__uiRawPlot.assignBuffer(self.__rawDataBuffer)
 
+        self.__uiFilteredPlot = UiFilteredPlot()
+        self.__uiFilteredPlot.assignBuffer(self.__filteredDataBuffer)
+
     def renderApp(self):
         self.__daq.startThread()
         self.__filter.startThread()
@@ -40,8 +44,11 @@ class App():
         #self.__mockRawData.startThread()
         self.__uiRawPlot.render()
         self.__uiRawPlot.startThread()
+        self.__uiFilteredPlot.render()
+        self.__uiFilteredPlot.startThread()
 
     def stopApp(self):
+        self.__uiFilteredPlot.stopThread()
         self.__uiRawPlot.stopThread()
         self.__mockRawData.stopThread()
         self.__uiFilter.stopThread()
