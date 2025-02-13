@@ -2,6 +2,7 @@ import serial
 import numpy as np
 import time
 import threading
+import h5py
 from util.abstractthread import abstractthread
 from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN
 
@@ -27,6 +28,10 @@ class Daq(abstractthread):
         self.__connect_thread = threading.Thread(target=self.connect)
         self.__connect_thread.daemon = True
         self.__connect_thread.start()
+
+        self.__recording = False
+        self.__hdf5_file = None
+        self.__hdf5_dataset = None
 
     def connect(self):
         while self.__ser is None:
@@ -102,7 +107,7 @@ class Daq(abstractthread):
         data_voltage = data_int * multiplier
     
         # Reshape the data to maintain the structure of channels and samples
-        data_voltage = data_voltage.reshape(self.__channelsNumber, self.__samplesPerPackage)
+        data_voltage = data_voltage.reshape(self.__channelsNumber, num_samples // self.__channelsNumber)
     
         return header_int, data_voltage, term
 
@@ -113,9 +118,42 @@ class Daq(abstractthread):
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
             self.__rawDataBuffer.addMultipleData(data)
+            if self.__recording:
+                self.saveDataToHDF5(data)
+
+    def saveDataToHDF5(self, data):
+        current_shape = self.__hdf5_dataset.shape
+        new_shape = (current_shape[0] + data.shape[1], self.__channelsNumber)
+        self.__hdf5_dataset.resize(new_shape)
+        self.__hdf5_dataset[-data.shape[1]:, :] = data.T
+        print("New data added")
+
+    def startRecording(self, filename='raw_data.h5'):
+        self.__hdf5_file = h5py.File(filename, 'w')
+        self.__hdf5_dataset = self.__hdf5_file.create_dataset(
+            'raw_data',
+            shape=(0, self.__channelsNumber),
+            maxshape=(None, self.__channelsNumber),
+            dtype=np.float64
+        )
+        self.__recording = True
+        print("Recording started")
+
+    def stopRecording(self):
+        self.__recording = False
+        if self.__hdf5_file:
+            self.__hdf5_file.close()
+            self.__hdf5_file = None
+            self.__hdf5_dataset = None
+        print("Recording stopped")
 
     def update(self):
         self.sendDataToBuffer()
 
     def assignBuffer(self, target):
         self.__rawDataBuffer = target
+
+    def close(self):
+        self.stopRecording()
+        if self.__ser:
+            self.__ser.close()

@@ -60,3 +60,5 @@ class UiRawPlot(abstractthread):
     def toggleRealTimePlot(self):
         self.__realTimePlot = not self.__realTimePlot
         dpg.configure_item("btn_ToggleRealTimePlot", label="Stop" if self.__realTimePlot else "Continue")
+
+    
