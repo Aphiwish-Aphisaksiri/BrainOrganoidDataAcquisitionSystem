@@ -25,6 +25,7 @@ class Record(abstractthread):
         )
         self.__recording = True
         print("Recording started")
+        return True
 
     def stopRecording(self):
         self.__recording = False
@@ -33,6 +34,7 @@ class Record(abstractthread):
             self.__hdf5_file = None
             self.__hdf5_dataset = None
         print("Recording stopped")
+        return True
 
     def update(self):
         if self.__recording and self.__recordBuffer.isDataUpdated():

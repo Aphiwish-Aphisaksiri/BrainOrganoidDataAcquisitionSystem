@@ -28,11 +28,23 @@ class UiRecord(abstractthread):
         pass
 
     def startRecording(self):
-        self.__recordThread.startRecording()
-        dpg.set_value("daq_setting_feedback", "Recording...")
+        if not self.__recording:
+            if self.__recordThread.startRecording():
+                dpg.set_value("daq_setting_feedback", "Recording...")
+                self.__recording = True
+            else:
+                dpg.set_value("daq_setting_feedback", "Failed to start recording")
+        else:
+            dpg.set_value("daq_setting_feedback", "Already recording")
 
     def stopRecording(self):
-        self.__recordThread.stopRecording()
-        dpg.set_value("daq_setting_feedback", "Recording stopped")
+        if self.__recording:
+            if self.__recordThread.stopRecording():
+                dpg.set_value("daq_setting_feedback", "Recording stopped")
+                self.__recording = False
+            else:
+                dpg.set_value("daq_setting_feedback", "Failed to stop recording")
+        else:
+            dpg.set_value("daq_setting_feedback", "Currently not recording")
 
     
