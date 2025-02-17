@@ -1,5 +1,7 @@
 import h5py
 import numpy as np
+import os
+from datetime import datetime
 from util.abstractthread import abstractthread
 from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
 
@@ -15,7 +17,15 @@ class Record(abstractthread):
     def assignBuffer(self, target):
         self.__recordBuffer = target
 
-    def startRecording(self, filename='raw_data.h5'):
+    def startRecording(self):
+        # Generate filename based on the current date and time
+        start_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = os.path.join('datarecord', f'record_{start_time}.h5')
+        
+        # Ensure the datarecord directory exists
+        os.makedirs('datarecord', exist_ok=True)
+        
+        # Open the HDF5 file
         self.__hdf5_file = h5py.File(filename, 'w')
         self.__hdf5_dataset = self.__hdf5_file.create_dataset(
             'raw_data',
@@ -24,7 +34,7 @@ class Record(abstractthread):
             dtype=np.float64
         )
         self.__recording = True
-        print("Recording started")
+        print(f"Recording started: {filename}")
         return True
 
     def stopRecording(self):

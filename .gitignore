@@ -1,0 +1,8 @@
+# Ignore all contents of the datarecord folder
+datarecord/*
+
+# But do not ignore the datarecord folder itself
+!datarecord/
+
+# Do not ignore the .gitkeep file in the datarecord folder
+!datarecord/.gitkeep
