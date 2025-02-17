@@ -2,15 +2,15 @@ import dearpygui.dearpygui as dpg
 from util.abstractthread import abstractthread
 from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
 
-class UiDaq(abstractthread):
-    def __init__(self, daqThread):
+class UiRecord(abstractthread):
+    def __init__(self, recordThread):
         super().__init__()
-        self.__daqThread = daqThread
+        self.__recordThread = recordThread
         self.setThreadFrequency(30)
         self.__recording = False
 
     def render(self):
-        with dpg.window(label="Daq UI", width=400, height=300):
+        with dpg.window(label="Record UI", width=400, height=300):
             dpg.add_text("Recording")
             dpg.add_button(label="Start", callback=self.startRecording, tag="btn_StartRecording")
             dpg.add_button(label="Stop", callback=self.stopRecording, tag="btn_StopRecording")
@@ -21,18 +21,18 @@ class UiDaq(abstractthread):
                                multiline=True,
                                default_value="Standing by")
             
-    def assignDaq(self, target):
-        self.__daqThread = target
+    def assignRecord(self, target):
+        self.__recordThread = target
 
     def update(self):
         pass
 
     def startRecording(self):
-        self.__daqThread.startRecording()
+        self.__recordThread.startRecording()
         dpg.set_value("daq_setting_feedback", "Recording...")
 
     def stopRecording(self):
-        self.__daqThread.stopRecording()
+        self.__recordThread.stopRecording()
         dpg.set_value("daq_setting_feedback", "Recording stopped")
 
     

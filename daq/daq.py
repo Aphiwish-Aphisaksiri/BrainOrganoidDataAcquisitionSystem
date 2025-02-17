@@ -4,7 +4,7 @@ import time
 import threading
 import h5py
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN
+from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, CONVERTED_RAW_DATA_BUFFER_SIZE
 
 class Daq(abstractthread):
     def __init__(self):
@@ -30,8 +30,7 @@ class Daq(abstractthread):
         self.__connect_thread.start()
 
         self.__recording = False
-        self.__hdf5_file = None
-        self.__hdf5_dataset = None
+        self.__recordBuffer = None
 
     def connect(self):
         while self.__ser is None:
@@ -119,32 +118,21 @@ class Daq(abstractthread):
             header, data, term = self.convertByteArrayToData(package)
             self.__rawDataBuffer.addMultipleData(data)
             if self.__recording:
-                self.saveDataToHDF5(data)
+                self.sendDataToRecordBuffer(data, [99,199])
 
-    def saveDataToHDF5(self, data):
-        current_shape = self.__hdf5_dataset.shape
-        new_shape = (current_shape[0] + data.shape[1], self.__channelsNumber)
-        self.__hdf5_dataset.resize(new_shape)
-        self.__hdf5_dataset[-data.shape[1]:, :] = data.T
-        print("New data added")
+    def sendDataToRecordBuffer(self, data, term):
+        buffer_size = CONVERTED_RAW_DATA_BUFFER_SIZE
+        record_data = np.zeros((self.__channelsNumber, buffer_size))
+        record_data[:, :data.shape[1]] = data
+        record_data[:, data.shape[1]:data.shape[1]+2] = term  # Add terminators
+        self.__recordBuffer.addMultipleData(record_data)
 
-    def startRecording(self, filename='raw_data.h5'):
-        self.__hdf5_file = h5py.File(filename, 'w')
-        self.__hdf5_dataset = self.__hdf5_file.create_dataset(
-            'raw_data',
-            shape=(0, self.__channelsNumber),
-            maxshape=(None, self.__channelsNumber),
-            dtype=np.float64
-        )
+    def startRecording(self):
         self.__recording = True
         print("Recording started")
 
     def stopRecording(self):
         self.__recording = False
-        if self.__hdf5_file:
-            self.__hdf5_file.close()
-            self.__hdf5_file = None
-            self.__hdf5_dataset = None
         print("Recording stopped")
 
     def update(self):
@@ -152,6 +140,9 @@ class Daq(abstractthread):
 
     def assignBuffer(self, target):
         self.__rawDataBuffer = target
+
+    def assignRecordBuffer(self, target):
+        self.__recordBuffer = target
 
     def close(self):
         self.stopRecording()

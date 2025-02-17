@@ -7,7 +7,7 @@ from util.buffer import Buffer
 from ui.mockRawData import MockRawData
 from ui.ui_dataProc import UiDataProc
 from ui.ui_filteredplot import UiFilteredPlot
-from ui.ui_daq import UiDaq
+from ui.ui_record import UiRecord
 from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
 
 class App():
@@ -16,13 +16,12 @@ class App():
         self.__channelsNumber = CHANNELS_NUMBER
         self.__rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+        self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
 
     def initializeThreads(self):
         self.__daq = Daq()
         self.__daq.assignBuffer(self.__rawDataBuffer)
-        
-        self.__uiDaq = UiDaq(self.__daq)
-        self.__uiDaq.assignDaq(self.__daq)
+        self.__daq.assignRecordBuffer(self.__recordBuffer)
 
         self.__filter = Filter()
         self.__filter.assignInletBuffer(self.__rawDataBuffer)
@@ -40,9 +39,15 @@ class App():
         self.__uiFilteredPlot = UiFilteredPlot()
         self.__uiFilteredPlot.assignBuffer(self.__filteredDataBuffer)
 
+        self.__record = Record()
+        self.__record.assignBuffer(self.__recordBuffer)
+        
+        self.__uiRecord = UiRecord(self.__record)
+        self.__uiRecord.assignRecord(self.__record)
+
     def renderApp(self):
         self.__daq.startThread()
-        self.__uiDaq.render()
+        self.__uiRecord.render()
         self.__filter.startThread()
         self.__uiFilter.render()
         self.__uiFilter.startThread()
@@ -51,6 +56,7 @@ class App():
         self.__uiRawPlot.startThread()
         self.__uiFilteredPlot.render()
         self.__uiFilteredPlot.startThread()
+        self.__record.startThread()
 
     def stopApp(self):
         self.__uiFilteredPlot.stopThread()
@@ -58,6 +64,8 @@ class App():
         self.__mockRawData.stopThread()
         self.__uiFilter.stopThread()
         self.__filter.stopThread()
-        self.__uiDaq.stopThread()
+        self.__uiRecord.stopThread()
         self.__daq.stopThread()
+        self.__record.stopThread()
         self.__daq.close()
+        self.__record.close()
