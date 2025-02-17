@@ -46,7 +46,7 @@ class Record(abstractthread):
             new_shape = (current_shape[0] + data.shape[1], self.__channelsNumber)
             self.__hdf5_dataset.resize(new_shape)
             self.__hdf5_dataset[-data.shape[1]:, :] = data.T
-            print("New data added")
+            # print("New data added")
 
     def close(self):
         self.stopRecording()
