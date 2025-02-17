@@ -1,8 +1,14 @@
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 def plot_hdf5_data(filename):
+    # Check if the file exists
+    if not os.path.exists(filename):
+        print(f"File not found: {filename}")
+        return
+
     # Open the HDF5 file
     with h5py.File(filename, 'r') as h5file:
         # Access the dataset
@@ -32,5 +38,5 @@ def plot_hdf5_data(filename):
         plt.show()
 
 if __name__ == "__main__":
-    filename = 'raw_data.h5'
+    filename = r'datarecord\record_20250217_144350.h5'
     plot_hdf5_data(filename)

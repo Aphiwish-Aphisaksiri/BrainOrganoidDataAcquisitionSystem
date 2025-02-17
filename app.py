@@ -8,7 +8,7 @@ from ui.mockRawData import MockRawData
 from ui.ui_dataProc import UiDataProc
 from ui.ui_filteredplot import UiFilteredPlot
 from ui.ui_record import UiRecord
-from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
+from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, SAMPLES_PER_PACKAGE
 
 class App():
     def __init__(self):
@@ -16,7 +16,7 @@ class App():
         self.__channelsNumber = CHANNELS_NUMBER
         self.__rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
-        self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+        self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=SAMPLES_PER_PACKAGE)
 
     def initializeThreads(self):
         self.__daq = Daq()

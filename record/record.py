@@ -49,9 +49,7 @@ class Record(abstractthread):
     def update(self):
         if self.__recording and self.__recordBuffer.isDataUpdated():
             data = self.__recordBuffer.getData()
-            terminator_indices = np.where(data == 99)[1]  # Find terminator indices
-            if len(terminator_indices) > 0:
-                data = data[:, :terminator_indices[0]]  # Trim data at the first terminator
+            print(data.shape)
             current_shape = self.__hdf5_dataset.shape
             new_shape = (current_shape[0] + data.shape[1], self.__channelsNumber)
             self.__hdf5_dataset.resize(new_shape)

@@ -116,15 +116,11 @@ class Daq(abstractthread):
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
             self.__rawDataBuffer.addMultipleData(data)
-            self.sendDataToRecordBuffer(data, [99,199])
+            self.sendDataToRecordBuffer(data)
 
-    def sendDataToRecordBuffer(self, data, term):
-        buffer_size = CONVERTED_RAW_DATA_BUFFER_SIZE
-        record_data = np.zeros((self.__channelsNumber, buffer_size))
-        record_data[:, :data.shape[1]] = data
-        record_data[:, data.shape[1]:data.shape[1]+2] = term  # Add terminators
-        #print(record_data)
-        self.__recordBuffer.addMultipleData(record_data)
+    def sendDataToRecordBuffer(self, data):
+        self.__recordBuffer.addBatchData(data)
+        # print(data)
 
     def update(self):
         self.sendDataToBuffer()
