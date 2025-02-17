@@ -19,6 +19,7 @@ class Record(abstractthread):
 
     def startRecording(self):
         # Generate filename based on the current date and time
+        self.__recordBuffer.clearData()
         start_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = os.path.join('datarecord', f'record_{start_time}.h5')
         
@@ -47,14 +48,17 @@ class Record(abstractthread):
         return True
 
     def update(self):
-        if self.__recording and self.__recordBuffer.isDataUpdated():
-            data = self.__recordBuffer.getData()
-            print(data.shape)
-            current_shape = self.__hdf5_dataset.shape
-            new_shape = (current_shape[0] + data.shape[1], self.__channelsNumber)
-            self.__hdf5_dataset.resize(new_shape)
-            self.__hdf5_dataset[-data.shape[1]:, :] = data.T
-            # print("New data added")
+        if self.__recording:
+            if self.__recordBuffer.isBufferFull():
+                data = self.__recordBuffer.getData()
+                self.__recordBuffer.clearData()
+                #print(data.shape)
+                #print(data[:, -1])
+                current_shape = self.__hdf5_dataset.shape
+                new_shape = (current_shape[0] + data.shape[1], self.__channelsNumber)
+                self.__hdf5_dataset.resize(new_shape)
+                self.__hdf5_dataset[-data.shape[1]:, :] = data.T
+                # print("New data added")
 
     def close(self):
         self.stopRecording()

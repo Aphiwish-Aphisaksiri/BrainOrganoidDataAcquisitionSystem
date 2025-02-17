@@ -119,7 +119,7 @@ class Daq(abstractthread):
             self.sendDataToRecordBuffer(data)
 
     def sendDataToRecordBuffer(self, data):
-        self.__recordBuffer.addBatchData(data)
+        self.__recordBuffer.addMultipleData(data)
         # print(data)
 
     def update(self):

@@ -16,7 +16,7 @@ class App():
         self.__channelsNumber = CHANNELS_NUMBER
         self.__rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
-        self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=SAMPLES_PER_PACKAGE)
+        self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
 
     def initializeThreads(self):
         self.__daq = Daq()
