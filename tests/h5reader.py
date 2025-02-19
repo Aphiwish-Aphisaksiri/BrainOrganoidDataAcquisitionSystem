@@ -46,5 +46,5 @@ def plot_hdf5_data(filename):
         plt.show()
 
 if __name__ == "__main__":
-    filename = r'filtereddatarecord\record_20250217_161243_000.253800.h5'
+    filename = r'filtereddatarecord\record_20250219_140035_00253800.h5'
     plot_hdf5_data(filename)

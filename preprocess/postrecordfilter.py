@@ -30,12 +30,12 @@ def apply_filters(data, fs, lowpass, highpass):
     filtered_data = filtfilt(b_lowpass, a_lowpass, data, axis=0)
     
     # High-pass filter
-    # b_highpass, a_highpass = design_highpass_filter(highpass, fs)
-    # filtered_data = filtfilt(b_highpass, a_highpass, filtered_data, axis=0)
+    b_highpass, a_highpass = design_highpass_filter(highpass, fs)
+    filtered_data = filtfilt(b_highpass, a_highpass, filtered_data, axis=0)
     
     # # Comb filter at 50 Hz
-    # b_comb, a_comb = design_comb_filter(50, fs)
-    # filtered_data = filtfilt(b_comb, a_comb, filtered_data, axis=0)
+    b_comb, a_comb = design_comb_filter(50, fs)
+    filtered_data = filtfilt(b_comb, a_comb, filtered_data, axis=0)
     
     return filtered_data
 
