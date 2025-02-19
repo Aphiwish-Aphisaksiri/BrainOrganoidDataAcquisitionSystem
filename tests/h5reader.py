@@ -11,32 +11,40 @@ def plot_hdf5_data(filename):
 
     # Open the HDF5 file
     with h5py.File(filename, 'r') as h5file:
-        # Access the dataset
-        dataset = h5file['raw_data']
+        # Access the datasets
+        raw_data = h5file['raw_data']
+        filtered_data = h5file['filtered_data']
         
         # Get the number of samples and channels
-        num_samples = dataset.shape[0]
-        num_channels = dataset.shape[1]
+        num_samples = raw_data.shape[0]
+        num_channels = raw_data.shape[1]
         
         # Create a figure with subplots for each channel
-        fig, axes = plt.subplots(num_channels, 1, figsize=(12, 6 * num_channels), sharex=True)
+        fig, axes = plt.subplots(num_channels, 2, figsize=(24, 6 * num_channels), sharex=True)
         
         # Plot each channel
         for channel in range(num_channels):
-            ax = axes[channel] if num_channels > 1 else axes
-            ax.set_title(f'Channel {channel + 1}')
-            ax.set_xlabel('Sample Index')
-            ax.set_ylabel('Voltage (V)')
+            # Plot raw data
+            ax_raw = axes[channel, 0] if num_channels > 1 else axes[0]
+            ax_raw.set_title(f'Raw Data - Channel {channel + 1}')
+            ax_raw.set_xlabel('Sample Index')
+            ax_raw.set_ylabel('Voltage (V)')
+            ax_raw.plot(raw_data[:, channel], label=f'Channel {channel + 1}')
+            ax_raw.legend()
+            ax_raw.grid()
             
-            # Plot the data for the current channel
-            ax.plot(dataset[:, channel], label=f'Channel {channel + 1}')
-            
-            ax.legend()
-            ax.grid()
+            # Plot filtered data
+            ax_filtered = axes[channel, 1] if num_channels > 1 else axes[1]
+            ax_filtered.set_title(f'Filtered Data - Channel {channel + 1}')
+            ax_filtered.set_xlabel('Sample Index')
+            ax_filtered.set_ylabel('Voltage (V)')
+            ax_filtered.plot(filtered_data[:, channel], label=f'Channel {channel + 1}')
+            ax_filtered.legend()
+            ax_filtered.grid()
         
         plt.tight_layout()
         plt.show()
 
 if __name__ == "__main__":
-    filename = r'datarecord\record_20250217_161243.h5'
+    filename = r'filtereddatarecord\record_20250217_161243_000.253800.h5'
     plot_hdf5_data(filename)

@@ -6,3 +6,12 @@ datarecord/*
 
 # Do not ignore the .gitkeep file in the datarecord folder
 !datarecord/.gitkeep
+
+# Ignore all contents of the filtereddatarecord folder
+filtereddatarecord/*
+
+# But do not ignore the filtereddatarecord folder itself
+!filtereddatarecord/
+
+# Do not ignore the .gitkeep file in the filtereddatarecord folder
+!filtereddatarecord/.gitkeep
