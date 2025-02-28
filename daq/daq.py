@@ -91,8 +91,8 @@ class Daq(abstractthread):
     
         header_int = header  # header is already an integer
     
-        # Convert byte array to bit array
-        bit_array = np.unpackbits(np.frombuffer(data, dtype=np.uint8))
+        # Convert byte array to bit array with big-endian format
+        bit_array = np.unpackbits(np.frombuffer(data, dtype='>u1'))
     
         # Extract samples based on the configured bits per sample
         num_samples = len(bit_array) // self.__bitsPerSample
