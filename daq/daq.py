@@ -4,7 +4,7 @@ import time
 import threading
 import h5py
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, CONVERTED_RAW_DATA_BUFFER_SIZE
+from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, CONVERTED_RAW_DATA_BUFFER_SIZE, HEADER_VALUE, TERMINATOR_VALUE
 
 class Daq(abstractthread):
     def __init__(self):
@@ -53,7 +53,7 @@ class Daq(abstractthread):
                 self.__rawData += self.__ser.read(self.__ser.in_waiting)
                 packages = []
                 while len(self.__rawData) >= self.__packageLen:
-                    if self.__rawData[0] != 0xAA:
+                    if self.__rawData[0] != HEADER_VALUE:
                         self.__rawData = self.__rawData[1:]
                         continue
                     package = self.__rawData[:self.__packageLen]
@@ -62,7 +62,7 @@ class Daq(abstractthread):
                     header = package[0]
                     term = package[-1]
 
-                    if header == 0xAA and term == 0xFF and len(package) == self.__packageLen:
+                    if header == HEADER_VALUE and term == TERMINATOR_VALUE and len(package) == self.__packageLen:
                         packages.append(package)
                         self.__samplesCount += self.__samplesPerPackage
                     else:
