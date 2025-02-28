@@ -4,7 +4,7 @@ import time
 import threading
 import h5py
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, CONVERTED_RAW_DATA_BUFFER_SIZE, HEADER_VALUE, TERMINATOR_VALUE
+from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, CONVERTED_RAW_DATA_BUFFER_SIZE, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE
 
 class Daq(abstractthread):
     def __init__(self):
@@ -17,8 +17,8 @@ class Daq(abstractthread):
         self.__payloadLen = -(-self.__channelsNumber * self.__bitsPerSample * self.__samplesPerPackage // 8) # Weird -(-) is used to ceil the division
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
-        self.__port = 'COM5'
-        self.__baudrate = 1250000
+        self.__port = COM_PORT
+        self.__baudrate = BAUDRATE
         self.__reconnect_interval = 5  # seconds
         self.__ser = None
         self.__rawData = bytearray()
