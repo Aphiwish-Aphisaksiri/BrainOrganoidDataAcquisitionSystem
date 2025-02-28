@@ -14,6 +14,8 @@ class Record(abstractthread):
         self.__recording = False
         self.__channelsNumber = CHANNELS_NUMBER
 
+        print("Current Record format: .h5")
+
     def assignBuffer(self, target):
         self.__recordBuffer = target
 

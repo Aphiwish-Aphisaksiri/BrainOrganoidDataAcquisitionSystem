@@ -15,6 +15,8 @@ class MockRawData(abstractthread):
         # Set mock data frequency
         self.setThreadFrequency(8000)
 
+        print("Current Data source: Mock data")
+
     def update(self):
         self.__rawData = np.random.randint(-100, 100, size=self.__channelsNumber)
         self.count += 1
@@ -33,3 +35,7 @@ class MockRawData(abstractthread):
 
     def assignRecordBuffer(self, target):
         self.__recordBuffer = target
+
+    def close(self):
+        # Just for compatibility with daq.py
+        pass

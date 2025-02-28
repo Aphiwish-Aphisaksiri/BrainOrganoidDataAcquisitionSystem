@@ -37,7 +37,7 @@ class abstractthread():
     def setThreadPeriod(self, period=THREAD_PERIOD):
         if period > 0:
             self.__threadPeriod = period
-            print(f"Period set to {period}")
+            # print(f"Period set to {period}")
             return True
         else:
             return False

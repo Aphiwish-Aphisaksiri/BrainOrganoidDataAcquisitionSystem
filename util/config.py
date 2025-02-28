@@ -3,6 +3,7 @@
 # Configuration variables
 
 ## DAQ configuration
+USE_MOCK_DATA = True
 SAMPLING_RATE = 8000
 CHANNELS_NUMBER = 4
 BITS_PER_SAMPLE = 24  # 19 bits
@@ -19,3 +20,8 @@ LOW_PASS_FILTER = 3800
 FILTER_ORDER = 4
 NOTCH_FILTER = 50
 GAIN = 1
+
+## Record configuration
+# "mat" for MATLAB .mat file
+# "h5" for HDF5 file
+RECORD_FORMAT = "mat"

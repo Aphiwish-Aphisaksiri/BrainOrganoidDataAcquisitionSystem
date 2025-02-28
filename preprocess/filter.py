@@ -111,4 +111,4 @@ class Filter(abstractthread):
         }
         with open(filename, 'w') as f:
             json.dump(filter_coefficients, f)
-        print(f"Filter coefficients saved to {filename}")
+        # print(f"Filter coefficients saved to {filename}")

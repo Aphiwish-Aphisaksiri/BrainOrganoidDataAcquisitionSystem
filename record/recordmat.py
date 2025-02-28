@@ -13,6 +13,8 @@ class RecordMat(abstractthread):
         self.__recording = False
         self.__channelsNumber = CHANNELS_NUMBER
 
+        print("Current Record format: .mat")
+
     def assignBuffer(self, target):
         self.__recordBuffer = target
 
