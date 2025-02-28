@@ -2,15 +2,18 @@ import random
 import numpy as np
 from util.abstractthread import abstractthread
 import time
+from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
 
 class MockRawData(abstractthread):
     def __init__(self):
         super().__init__()
-        self.__channelsNumber = 8
+        self.__channelsNumber = CHANNELS_NUMBER
         self.__rawData = np.zeros(self.__channelsNumber, dtype=int)
-        self.setThreadFrequency(200)
         self.count = 0
         self.starttime = time.time()
+
+        # Set mock data frequency
+        self.setThreadFrequency(200)
 
     def update(self):
         self.__rawData = np.random.randint(-100, 100, size=self.__channelsNumber)
