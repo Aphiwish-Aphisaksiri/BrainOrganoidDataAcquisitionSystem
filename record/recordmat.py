@@ -47,7 +47,7 @@ class RecordMat(abstractthread):
                 self.__recordBuffer.clearData()
                 # Append new data
                 self.__data = np.vstack((self.__data, data.T))
-                # print("New data added")
+                print("New data added")
 
     def close(self):
         self.stopRecording()

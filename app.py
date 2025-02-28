@@ -33,6 +33,7 @@ class App():
 
         self.__mockRawData = MockRawData()
         self.__mockRawData.assignBuffer(self.__rawDataBuffer)
+        self.__mockRawData.assignRecordBuffer(self.__recordBuffer)
 
         self.__uiRawPlot = UiRawPlot()
         self.__uiRawPlot.assignBuffer(self.__rawDataBuffer)

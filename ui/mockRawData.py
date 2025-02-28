@@ -13,7 +13,7 @@ class MockRawData(abstractthread):
         self.starttime = time.time()
 
         # Set mock data frequency
-        self.setThreadFrequency(200)
+        self.setThreadFrequency(8000)
 
     def update(self):
         self.__rawData = np.random.randint(-100, 100, size=self.__channelsNumber)
@@ -23,9 +23,13 @@ class MockRawData(abstractthread):
             #print(self.count)
             self.count = 0
         self.__rawDataBuffer.addData(self.__rawData.tolist())
+        self.__recordBuffer.addData(self.__rawData.tolist())
 
     def getRawData(self):
         self.__rawDataBuffer.addData(self.__rawData.tolist())
     
     def assignBuffer(self, target):
         self.__rawDataBuffer = target
+
+    def assignRecordBuffer(self, target):
+        self.__recordBuffer = target
