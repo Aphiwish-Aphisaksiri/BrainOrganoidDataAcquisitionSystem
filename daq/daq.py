@@ -132,6 +132,5 @@ class Daq(abstractthread):
         self.__recordBuffer = target
 
     def close(self):
-        self.stopRecording()
         if self.__ser:
             self.__ser.close()
