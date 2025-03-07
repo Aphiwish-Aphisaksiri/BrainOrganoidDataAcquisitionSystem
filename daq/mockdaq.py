@@ -45,7 +45,7 @@ class MockDaq(abstractthread):
                     sample_bytes = int(sample).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
                     package.extend(sample_bytes)
                 elif self.__mockType == "ChannelNumber":
-                    sample_bytes = int(_).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
+                    sample_bytes = int(_+1).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
                     package.extend(sample_bytes)
             package.append(TERMINATOR_VALUE)
             packages.append(package)
@@ -60,7 +60,7 @@ class MockDaq(abstractthread):
 
     def convertByteArrayToData(self, byteArray):
         multiplier = (2 * (VREF / GAIN)) / (2 ** self.__bitsPerSample)  # Adjust for the configured bit resolution
-    
+        multiplier = 1
         header = byteArray[0]  # first byte is the data type
         data = byteArray[1:-1]  # the data is from the second byte to the second last byte
         term = byteArray[-1]  # last byte is the terminator

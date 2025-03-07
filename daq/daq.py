@@ -84,7 +84,7 @@ class Daq(abstractthread):
 
     def convertByteArrayToData(self, byteArray):
         multiplier = (2 * (VREF / GAIN)) / (2 ** self.__bitsPerSample)  # Adjust for the configured bit resolution
-    
+        multiplier = 1
         header = byteArray[0]  # first byte is the data type
         data = byteArray[1:-1]  # the data is from the second byte to the second last byte
         term = byteArray[-1]  # last byte is the terminator

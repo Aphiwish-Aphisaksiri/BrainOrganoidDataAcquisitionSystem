@@ -3,7 +3,7 @@
 # Configuration variables
 
 ## DAQ configuration
-USE_MOCK_DATA = False
+USE_MOCK_DATA = True
 MOCK_TYPE = "ChannelNumber"
 HEADER_VALUE = 0xAA
 TERMINATOR_VALUE = 0xFF
