@@ -1,4 +1,5 @@
 from daq.daq import Daq
+from daq.mockdaq import MockDaq
 from preprocess.filter import Filter
 from ui.ui_rawplot import UiRawPlot
 from record.record import Record
@@ -9,7 +10,7 @@ from ui.mockRawData import MockRawData
 from ui.ui_dataProc import UiDataProc
 from ui.ui_filteredplot import UiFilteredPlot
 from ui.ui_record import UiRecord
-from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, SAMPLES_PER_PACKAGE, USE_MOCK_DATA, RECORD_FORMAT
+from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE
 
 class App():
     def __init__(self):
@@ -21,7 +22,8 @@ class App():
 
     def initializeThreads(self):
         if USE_MOCK_DATA:
-            self.__daq = MockRawData()
+            self.__daq = MockDaq(MOCK_TYPE)
+            # self.__daq = MockRawData()
             self.__daq.assignBuffer(self.__rawDataBuffer)
             self.__daq.assignRecordBuffer(self.__recordBuffer)
         else:
