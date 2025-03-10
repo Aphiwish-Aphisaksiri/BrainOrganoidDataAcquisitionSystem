@@ -105,7 +105,9 @@ class Daq(abstractthread):
         data_voltage = data_int * multiplier
     
         # Reshape the data to maintain the structure of channels and samples
-        data_voltage = data_voltage.reshape(self.__channelsNumber, num_samples // self.__channelsNumber)
+        data_voltage = data_voltage.reshape(num_samples // self.__channelsNumber, self.__channelsNumber)
+
+        data_voltage = data_voltage.T
     
         return header_int, data_voltage, term
 

@@ -47,8 +47,20 @@ class MockDaq(abstractthread):
                 elif self.__mockType == "ChannelNumber":
                     sample_bytes = int(_+1).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
                     package.extend(sample_bytes)
+                    # package.extend(sample_bytes)
+
+            # Testing 2 Stacking
+            for _ in range(self.__channelsNumber):
+                if self.__mockType == "TriangleWave":
+                    sample_bytes = int(sample).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
+                    package.extend(sample_bytes)
+                elif self.__mockType == "ChannelNumber":
+                    sample_bytes = int(_+1).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
+                    package.extend(sample_bytes)
+
             package.append(TERMINATOR_VALUE)
             packages.append(package)
+            print(package)
 
         currentTime = time.time()
         if currentTime - self.__startTime >= 1:
@@ -81,9 +93,14 @@ class MockDaq(abstractthread):
         data_voltage = data_int * multiplier
     
         # Reshape the data to maintain the structure of channels and samples
-        data_voltage = data_voltage.reshape(self.__channelsNumber, num_samples // self.__channelsNumber)
+        data_voltage = data_voltage.reshape(num_samples // self.__channelsNumber, self.__channelsNumber)
+
+        data_voltage = data_voltage.T
     
         return header_int, data_voltage, term
+    
+    def getSamplesCount(self):
+        return self.__samplesCount
 
     def sendDataToBuffer(self):
         packages = self.readData()
