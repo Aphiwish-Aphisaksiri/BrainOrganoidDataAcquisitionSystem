@@ -8,7 +8,7 @@ from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
 NUM_SAMPLE_TO_SHOW = 10000
 
 class UiRawPlot(abstractthread):
-    def __init__(self):
+    def __init__(self, daqThread):
         super().__init__()
         self.setThreadFrequency(30)
         self.__channelsNumber = CHANNELS_NUMBER
@@ -21,11 +21,14 @@ class UiRawPlot(abstractthread):
 
         self.__realTimePlot = True
 
+        self.__daqThread = daqThread
+
     def render(self):
         self.__uiWindowHandler = dpg.add_window(label="Raw Signal Viewer", width=800, height=600)
         with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
             dpg.add_text("Real time plot:")
             dpg.add_button(label="Stop", callback=self.toggleRealTimePlot, tag="btn_ToggleRealTimePlot")
+            dpg.add_input_text(label="Sample received", default_value="0", enabled=False, tag="txt_SampleReceived", width=100)
         self.__uiSubplotHandler = dpg.add_subplots(rows=self.__channelsNumber, columns=1, width=-1, height=-1, no_title=True, parent=self.__uiWindowHandler)
         self.__uiLineSeriesHandlerList = []    
         for i in range(self.__channelsNumber):
@@ -51,6 +54,9 @@ class UiRawPlot(abstractthread):
                 self.starttime = time.time()
                 #print(self.count)
                 self.count = 0
+            
+            samples_count = self.__daqThread.getSamplesCount()
+            dpg.set_value("txt_SampleReceived", str(samples_count))
 
     def fitGraph(self):
         pass
@@ -60,5 +66,3 @@ class UiRawPlot(abstractthread):
     def toggleRealTimePlot(self):
         self.__realTimePlot = not self.__realTimePlot
         dpg.configure_item("btn_ToggleRealTimePlot", label="Stop" if self.__realTimePlot else "Continue")
-
-    

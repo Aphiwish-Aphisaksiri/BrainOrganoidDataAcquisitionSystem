@@ -125,6 +125,9 @@ class Daq(abstractthread):
     def update(self):
         self.sendDataToBuffer()
 
+    def getSamplesCount(self):
+        return self.__samplesCount
+
     def assignBuffer(self, target):
         self.__rawDataBuffer = target
 

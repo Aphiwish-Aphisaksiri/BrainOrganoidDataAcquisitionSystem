@@ -38,7 +38,7 @@ class App():
         self.__uiFilter = UiDataProc(self.__filter)
         self.__uiFilter.assignFilter(self.__filter)
 
-        self.__uiRawPlot = UiRawPlot()
+        self.__uiRawPlot = UiRawPlot(self.__daq)
         self.__uiRawPlot.assignBuffer(self.__rawDataBuffer)
 
         self.__uiFilteredPlot = UiFilteredPlot()
