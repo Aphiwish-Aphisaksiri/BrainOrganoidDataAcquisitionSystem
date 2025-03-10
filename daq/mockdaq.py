@@ -48,6 +48,7 @@ class MockDaq(abstractthread):
                     sample_bytes = int(_+1).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
                     package.extend(sample_bytes)
                     # package.extend(sample_bytes)
+                self.__samplesCount += 1
 
             # Testing 2 Stacking
             for _ in range(self.__channelsNumber):
@@ -57,10 +58,10 @@ class MockDaq(abstractthread):
                 elif self.__mockType == "ChannelNumber":
                     sample_bytes = int(_+1).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
                     package.extend(sample_bytes)
+                self.__samplesCount += 1
 
             package.append(TERMINATOR_VALUE)
             packages.append(package)
-            print(package)
 
         currentTime = time.time()
         if currentTime - self.__startTime >= 1:
