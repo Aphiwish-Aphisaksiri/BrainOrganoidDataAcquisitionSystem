@@ -25,7 +25,7 @@ class UiFilteredPlot(abstractthread):
         self.__uiFilteredWindowHandler = dpg.add_window(label="Filtered Signal Viewer", width=800, height=600)
         with dpg.group(horizontal=True, parent=self.__uiFilteredWindowHandler):
             dpg.add_text("Real time plot:")
-            dpg.add_button(label="Stop", callback=self.toggleRealTimePlot, tag="btn_ToggleRealTimePlot_filtered")
+            dpg.add_button(label="Stop", callback=self.toggleRealTimePlot, tag="btn_ToggleRealTimePlot_filtered", width=75)
         self.__uiFilteredSubplotHandler = dpg.add_subplots(rows=self.__channelsNumber, columns=1, width=-1, height=-1, no_title=True, parent=self.__uiFilteredWindowHandler)
         self.__uiLineSeriesHandlerList = []    
         for i in range(self.__channelsNumber):

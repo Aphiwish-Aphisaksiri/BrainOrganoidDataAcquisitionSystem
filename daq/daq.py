@@ -24,6 +24,7 @@ class Daq(abstractthread):
         self.__rawData = bytearray()
         self.__startTime = time.time()
         self.__samplesCount = 0
+        self.__samplesCountPerSecond = 0
 
         self.__connect_thread = threading.Thread(target=self.connect)
         self.__connect_thread.daemon = True
@@ -71,6 +72,7 @@ class Daq(abstractthread):
                 currentTime = time.time()
                 if currentTime - self.__startTime >= 1:
                     print(f"Samples received in the last second: {self.__samplesCount}")
+                    self.__samplesCountPerSecond = self.__samplesCount
                     self.__samplesCount = 0
                     self.__startTime = currentTime
 
@@ -84,7 +86,6 @@ class Daq(abstractthread):
 
     def convertByteArrayToData(self, byteArray):
         multiplier = (2 * (VREF / GAIN)) / (2 ** self.__bitsPerSample)  # Adjust for the configured bit resolution
-        multiplier = 1
         header = byteArray[0]  # first byte is the data type
         data = byteArray[1:-1]  # the data is from the second byte to the second last byte
         term = byteArray[-1]  # last byte is the terminator
@@ -128,7 +129,7 @@ class Daq(abstractthread):
         self.sendDataToBuffer()
 
     def getSamplesCount(self):
-        return self.__samplesCount
+        return self.__samplesCountPerSecond
 
     def assignBuffer(self, target):
         self.__rawDataBuffer = target

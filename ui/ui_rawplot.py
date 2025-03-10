@@ -27,8 +27,9 @@ class UiRawPlot(abstractthread):
         self.__uiWindowHandler = dpg.add_window(label="Raw Signal Viewer", width=800, height=600)
         with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
             dpg.add_text("Real time plot:")
-            dpg.add_button(label="Stop", callback=self.toggleRealTimePlot, tag="btn_ToggleRealTimePlot")
-            dpg.add_input_text(label="Sample received", default_value="0", enabled=False, tag="txt_SampleReceived", width=100)
+            dpg.add_button(label="Stop", callback=self.toggleRealTimePlot, tag="btn_ToggleRealTimePlot", width=75)
+            dpg.add_text("  |  ")
+            dpg.add_input_text(label="Sample received per second", default_value="0", enabled=False, tag="txt_SampleReceived", width=50)
         self.__uiSubplotHandler = dpg.add_subplots(rows=self.__channelsNumber, columns=1, width=-1, height=-1, no_title=True, parent=self.__uiWindowHandler)
         self.__uiLineSeriesHandlerList = []    
         for i in range(self.__channelsNumber):
@@ -52,11 +53,8 @@ class UiRawPlot(abstractthread):
 
             if time.time() - self.starttime >= 1:
                 self.starttime = time.time()
-                #print(self.count)
-                self.count = 0
-            
-            samples_count = self.__daqThread.getSamplesCount()
-            dpg.set_value("txt_SampleReceived", str(samples_count))
+                samples_count = self.__daqThread.getSamplesCount()
+                dpg.set_value("txt_SampleReceived", str(samples_count))
 
     def fitGraph(self):
         pass
