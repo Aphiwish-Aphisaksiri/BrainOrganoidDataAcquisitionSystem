@@ -3,8 +3,8 @@
 # Configuration variables
 
 ## DAQ configuration
-USE_MOCK_DATA = False
-MOCK_TYPE = "ChannelNumber"
+USE_MOCK_DATA = True
+MOCK_TYPE = "SineWave"
 HEADER_VALUE = 0xAA
 TERMINATOR_VALUE = 0xFF
 COM_PORT = 'COM5'
@@ -18,6 +18,7 @@ SAMPLES_PER_PACKAGE = 2
 CONVERTED_RAW_DATA_BUFFER_SIZE = 10000
 VREF = 2.4
 GAIN = 12
+ON_ELECTRODE_CHANNEL_COUNT = 8
 
 ## Filter configuration
 HIGH_PASS_FILTER = 0.25
@@ -27,6 +28,10 @@ NOTCH_FILTER = 50
 GAIN = 1
 
 ## Record configuration
+RECORD_FORMAT = "mat"
 # "mat" for MATLAB .mat file
 # "h5" for HDF5 file
-RECORD_FORMAT = "mat"
+RECORD_CHANNELS = "odd"
+# "even" for even channels
+# "odd" for odd channels
+# "all" for all channels
