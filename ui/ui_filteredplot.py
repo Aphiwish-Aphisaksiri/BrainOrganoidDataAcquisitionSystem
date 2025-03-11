@@ -43,7 +43,14 @@ class UiFilteredPlot(abstractthread):
                 lineHandler = self.__uiLineSeriesHandlerList[i]
                 dpg.set_value(lineHandler, [self.__x, self.__buffer[i]])
                 y_min, y_max = np.min(self.__buffer[i]), np.max(self.__buffer[i])
-                dpg.set_axis_limits(f"filteredCH{i+1}", y_min*1.1, y_max*1.1)
+                y_range = y_max - y_min
+                if y_min == y_max:
+                    y_min -= 0.1
+                    y_max += 0.1
+                else:
+                    y_min = y_min - 0.1*y_range
+                    y_max = y_max + 0.1*y_range
+                dpg.set_axis_limits(f"filteredCH{i+1}", y_min, y_max)
 
             if time.time() - self.starttime >= 1:
                 self.starttime = time.time()

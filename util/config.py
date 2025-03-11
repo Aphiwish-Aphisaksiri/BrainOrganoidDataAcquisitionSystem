@@ -4,7 +4,7 @@
 
 ## DAQ configuration
 USE_MOCK_DATA = True
-MOCK_TYPE = "SineWave"
+MOCK_TYPE = "SineWave" # "SineWave", "TriangleWave", "ChannelNumber"
 COM_PORT = 'COM5'
 BAUDRATE = 1250000
 SAMPLING_RATE = 8000
