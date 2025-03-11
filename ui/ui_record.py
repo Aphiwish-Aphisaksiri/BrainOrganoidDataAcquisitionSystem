@@ -85,10 +85,11 @@ class UiRecord(abstractthread):
             dpg.set_value("daq_setting_feedback", f"Channel {channel} is already selected")
         
         self.__recordingChannels.sort()
-        dpg.set_value("daq_setting_feedback", f"Recording channels: {self.__recordingChannels}")
 
         if len(self.__recordingChannels) > CHANNELS_NUMBER:
-            dpg.set_value("daq_setting_feedback", f"Recording channels \nexceed the number of \nchannels")
+            dpg.set_value("daq_setting_feedback", f"Recording channels exceed the \nnumber of channels")
+        else:
+            dpg.set_value("daq_setting_feedback", f"Recording channels: {self.__recordingChannels}")
 
     def startRecording(self):
         if not self.__recording:
