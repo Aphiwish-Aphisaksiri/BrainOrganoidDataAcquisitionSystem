@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from scipy.io import savemat
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
+from util.config import CHANNELS_NUMBER, RECORD_CHANNELS, ON_ELECTRODE_CHANNEL_COUNT, SAMPLING_RATE
 
 class RecordMat(abstractthread):
     def __init__(self):
@@ -12,11 +12,36 @@ class RecordMat(abstractthread):
         self.__data = None
         self.__recording = False
         self.__channelsNumber = CHANNELS_NUMBER
+        self.__recordingChannels = []
+        self.channelRecordInit()
 
         print("Current Record format: .mat")
 
     def assignBuffer(self, target):
         self.__recordBuffer = target
+
+    def channelRecordInit(self):
+        for i in range(1, ON_ELECTRODE_CHANNEL_COUNT+1):
+            if RECORD_CHANNELS == "even" and i % 2 == 0:
+                self.__recordingChannels.append(i)
+            elif RECORD_CHANNELS == "odd" and i % 2 == 1:
+                self.__recordingChannels.append(i)
+            elif RECORD_CHANNELS == "all":
+                self.__recordingChannels.append(i)
+    
+    def getChannelRecordInit(self):
+        return self.__recordingChannels
+    
+    def setChannelRecord(self, channels):
+        self.__recordingChannels = channels
+        return self.__recordingChannels
+    
+    def convertRecordingChannel(self):
+        converted_channels = np.array(self.__recordingChannels, dtype=np.double).reshape(1, -1)
+        return converted_channels
+    
+    def convertSamplingRate(self):
+        return np.array([[SAMPLING_RATE]], dtype=np.double)
 
     def startRecording(self):
         # Generate filename based on the current date and time
@@ -36,8 +61,15 @@ class RecordMat(abstractthread):
     def stopRecording(self):
         self.__recording = False
         if self.__data is not None:
+            # Combine all data into a single dictionary
+            mat_data = {
+                'dat': self.__data,
+                'channels': self.convertRecordingChannel(),
+                'fs': self.convertSamplingRate(),
+                #'time': datetime.now().strftime("%Y%m%d_%H%M%S")
+            }
             # Save the data to a .mat file
-            savemat(self.__filename, {'raw_data': self.__data})
+            savemat(self.__filename, mat_data)
             self.__data = None
         print("Recording stopped")
         return True

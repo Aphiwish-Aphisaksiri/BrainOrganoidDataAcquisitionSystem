@@ -9,8 +9,7 @@ class UiRecord(abstractthread):
         self.setThreadFrequency(30)
         self.__recording = False
         self.__recordingChannels = []
-        self.channelRecordInit()
-        print(self.__recordingChannels)
+        self.getChannelRecordInit()
 
     def render(self):
         with dpg.window(label="Record UI", tag="tag_window_record", width=400, height=300):
@@ -68,15 +67,8 @@ class UiRecord(abstractthread):
     def update(self):
         pass
 
-    def channelRecordInit(self):
-        for i in range(1, ON_ELECTRODE_CHANNEL_COUNT+1):
-            if RECORD_CHANNELS == "even" and i % 2 == 0:
-                self.__recordingChannels.append(i)
-            elif RECORD_CHANNELS == "odd" and i % 2 == 1:
-                self.__recordingChannels.append(i)
-            elif RECORD_CHANNELS == "all":
-                self.__recordingChannels.append(i)
-
+    def getChannelRecordInit(self):
+        self.__recordingChannels = self.__recordThread.getChannelRecordInit()
 
     def setChannelRecord(self, sender, app_data):
         channel = int(sender[-1])
@@ -93,8 +85,11 @@ class UiRecord(abstractthread):
 
         if len(self.__recordingChannels) > CHANNELS_NUMBER:
             dpg.set_value("daq_setting_feedback", f"Recording channels exceed the \nnumber of channels")
+        elif len(self.__recordingChannels) == 0:
+            dpg.set_value("daq_setting_feedback", "No recording channel selected")
         else:
-            dpg.set_value("daq_setting_feedback", f"Recording channels: {self.__recordingChannels}")
+            dpg.set_value("daq_setting_feedback", f"Recording channels: {self.__recordThread.setChannelRecord(self.__recordingChannels)}")
+
 
     def startRecording(self):
         if not self.__recording:

@@ -35,7 +35,7 @@ GAIN = 1
 RECORD_FORMAT = "mat"
 # "mat" for MATLAB .mat file
 # "h5" for HDF5 file
-RECORD_CHANNELS = "odd"
+RECORD_CHANNELS = "even"
 # "even" for even channels
 # "odd" for odd channels
 # "all" for all channels
