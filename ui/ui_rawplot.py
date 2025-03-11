@@ -3,9 +3,7 @@ import time
 import numpy as np
 import dearpygui.dearpygui as dpg
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE
-
-NUM_SAMPLE_TO_SHOW = 10000
+from util.config import CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW
 
 class UiRawPlot(abstractthread):
     def __init__(self, daqThread):
