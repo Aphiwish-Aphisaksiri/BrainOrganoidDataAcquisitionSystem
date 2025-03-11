@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, RECORD_CHANNELS, ON_ELECTRODE_CHANNEL_COUNT
+from util.config import CHANNELS_NUMBER, SAMPLES_PER_PACKAGE, RECORD_CHANNELS, ON_ELECTRODE_CHANNEL_COUNT, SAMPLING_RATE
 
 class UiRecord(abstractthread):
     def __init__(self, recordThread):
@@ -14,7 +14,7 @@ class UiRecord(abstractthread):
 
     def render(self):
         with dpg.window(label="Record UI", tag="tag_window_record", width=400, height=300):
-            dpg.add_text("Recording Channels")
+            dpg.add_text("|Recording Channels|")
             with dpg.group(horizontal=True):
                 with dpg.group(horizontal=False):
                     for i in range(1, ON_ELECTRODE_CHANNEL_COUNT+1):
@@ -33,7 +33,7 @@ class UiRecord(abstractthread):
 
                         dpg.add_checkbox(label=f"Channel {i}", tag=f"checkbox_ch{i}", default_value=checkboxValue, callback=self.setChannelRecord)
 
-                dpg.add_text("|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n")
+                dpg.add_text("|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n")
                 with dpg.group(horizontal=False):
                     dpg.add_text("Channel Arrangement")
                     dpg.add_input_text(tag="input_text_channel_arrangement",
@@ -44,7 +44,12 @@ class UiRecord(abstractthread):
                                 default_value="3   2   1\n\n4  GND  8  REF\n\n5   6   7")
             
             dpg.add_text("____________________________________________________")
-            dpg.add_text("Recording control")
+            dpg.add_text("|Configurations|")
+            dpg.add_text(f"Number of Channels : {CHANNELS_NUMBER} Channel(s)")
+            dpg.add_text(f"Stacking samples: {SAMPLES_PER_PACKAGE} Sample(s)")
+            dpg.add_text(f"Sampling rate: {SAMPLING_RATE} Hz")
+            dpg.add_text("____________________________________________________")
+            dpg.add_text("|Recording Control|")
             with dpg.group(horizontal=True):
                 dpg.add_button(label="Start", callback=self.startRecording, tag="btn_StartRecording", width=126)
                 dpg.add_button(label="Stop", callback=self.stopRecording, tag="btn_StopRecording", width=126)
