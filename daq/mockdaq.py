@@ -27,8 +27,16 @@ class MockDaq(abstractthread):
         self.__triangle_wave = self.generate_triangle_wave(0, 100, 1000)
         self.__triangle_wave_index = 0
 
+        # Sine wave parameters
+        self.__sine_wave = self.generate_sine_wave(0, 100, 1000)
+        self.__sine_wave_index = 0
+
     def generate_triangle_wave(self, min_val, max_val, num_samples):
         return np.linspace(min_val, max_val, num_samples // 2).tolist() + np.linspace(max_val, min_val, num_samples // 2).tolist()
+
+    def generate_sine_wave(self, min_val, max_val, num_samples):
+        t = np.linspace(0, 2 * np.pi, num_samples)
+        return ((np.sin(t) + 1) / 2 * (max_val - min_val) + min_val).tolist()
 
     def readData(self):
         packages = []
@@ -38,21 +46,15 @@ class MockDaq(abstractthread):
                     self.__triangle_wave_index = 0
                 sample = self.__triangle_wave[self.__triangle_wave_index]
                 self.__triangle_wave_index += 1
+            elif self.__mockType == "SineWave":
+                if self.__sine_wave_index >= len(self.__sine_wave):
+                    self.__sine_wave_index = 0
+                sample = self.__sine_wave[self.__sine_wave_index]
+                self.__sine_wave_index += 1
 
             package = bytearray([HEADER_VALUE])
             for _ in range(self.__channelsNumber):
-                if self.__mockType == "TriangleWave":
-                    sample_bytes = int(sample).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
-                    package.extend(sample_bytes)
-                elif self.__mockType == "ChannelNumber":
-                    sample_bytes = int(_+1).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
-                    package.extend(sample_bytes)
-                    # package.extend(sample_bytes)
-                self.__samplesCount += 1
-
-            # Testing 2 Stacking
-            for _ in range(self.__channelsNumber):
-                if self.__mockType == "TriangleWave":
+                if self.__mockType in ["TriangleWave", "SineWave"]:
                     sample_bytes = int(sample).to_bytes(self.__bitsPerSample // 8, byteorder='big', signed=True)
                     package.extend(sample_bytes)
                 elif self.__mockType == "ChannelNumber":
