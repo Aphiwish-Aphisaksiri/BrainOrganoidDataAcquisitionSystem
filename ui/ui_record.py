@@ -45,7 +45,7 @@ class UiRecord(abstractthread):
             
             dpg.add_text("____________________________________________________")
             dpg.add_text("|Configurations|")
-            dpg.add_text(f"Number of Channels : {CHANNELS_NUMBER} Channel(s)")
+            dpg.add_text(f"Number of Channels: {CHANNELS_NUMBER} Channel(s)")
             dpg.add_text(f"Stacking samples: {SAMPLES_PER_PACKAGE} Sample(s)")
             dpg.add_text(f"Sampling rate: {SAMPLING_RATE} Hz")
             dpg.add_text("____________________________________________________")
