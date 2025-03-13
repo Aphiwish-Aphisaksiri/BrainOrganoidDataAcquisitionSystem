@@ -2,7 +2,7 @@ import numpy as np
 import time
 import threading
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, CONVERTED_RAW_DATA_BUFFER_SIZE, HEADER_VALUE, TERMINATOR_VALUE
+from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, HEADER_VALUE, TERMINATOR_VALUE, SAMPLING_RATE
 
 class MockDaq(abstractthread):
     def __init__(self, mockType):
@@ -11,17 +11,21 @@ class MockDaq(abstractthread):
         self.__bitsPerSample = BITS_PER_SAMPLE
         self.__headerLen = HEADER_LEN
         self.__termLen = TERM_LEN
-        self.__samplesPerPackage = SAMPLES_PER_PACKAGE
+        self.__samplesPerPackage = SAMPLES_PER_PACKAGE = 65
+        self.__samplingRate = SAMPLING_RATE
         self.__payloadLen = -(-self.__channelsNumber * self.__bitsPerSample * self.__samplesPerPackage // 8) # Weird -(-) is used to ceil the division
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
         self.__rawData = bytearray()
         self.__startTime = time.time()
         self.__samplesCount = 0
+        self.__samplesCountPerSecond = 0
 
         self.__recordBuffer = None
 
         self.__mockType = mockType
+
+        self.setThreadFrequency(30)
 
         # Triangle wave parameters
         self.__triangle_wave = self.generate_triangle_wave(0, 100, 1000)
@@ -68,7 +72,14 @@ class MockDaq(abstractthread):
         currentTime = time.time()
         if currentTime - self.__startTime >= 1:
             print(f"Samples generated in the last second: {self.__samplesCount}")
+            self.__samplesCountPerSecond = self.__samplesCount
             self.__samplesCount = 0
+            if self.__samplesCountPerSecond > self.__samplingRate * 1.03:
+                self.__samplesPerPackage -= 1
+                print(f"Adjusting mock data stack count to: {self.__samplesPerPackage}")
+            elif self.__samplesCountPerSecond < self.__samplingRate * 0.97:
+                self.__samplesPerPackage += 1
+                print(f"Adjusting mock data stack count to: {self.__samplesPerPackage}")
             self.__startTime = currentTime
 
         return packages
@@ -103,7 +114,7 @@ class MockDaq(abstractthread):
         return header_int, data_voltage, term
     
     def getSamplesCount(self):
-        return self.__samplesCount
+        return self.__samplesCountPerSecond
 
     def sendDataToBuffer(self):
         packages = self.readData()
