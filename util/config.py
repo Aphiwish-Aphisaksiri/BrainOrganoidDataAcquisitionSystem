@@ -10,20 +10,9 @@ BAUDRATE = 1250000
 SAMPLING_RATE = 8000
 CHANNELS_NUMBER = 4
 SAMPLES_PER_PACKAGE = 2
-BITS_PER_SAMPLE = 24  # 19 bits
-UNIT_MULTIPLIER = 1_000_000
-HEADER_LEN = 1
-TERM_LEN = 1
-HEADER_VALUE = 0xAA
-TERMINATOR_VALUE = 0xFF
-VREF = 2.4
-GAIN = 12
-ON_ELECTRODE_CHANNEL_COUNT = 8
 
 ## Plotting configuration
 TIME_TO_SHOW = 1.5
-CONVERTED_RAW_DATA_BUFFER_SIZE = int(TIME_TO_SHOW*SAMPLING_RATE)
-NUM_SAMPLE_TO_SHOW = int(TIME_TO_SHOW*SAMPLING_RATE)
 AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 
 ## Filter configuration
@@ -34,10 +23,23 @@ NOTCH_FILTER = 50
 GAIN = 1
 
 ## Record configuration
-RECORD_FORMAT = "mat"
-# "mat" for MATLAB .mat file
-# "h5" for HDF5 file
-RECORD_CHANNELS = "even"
-# "even" for even channels
-# "odd" for odd channels
-# "all" for all channels
+RECORD_FORMAT = "mat" # "mat", "h5"
+RECORD_CHANNELS = "even" # 'even' for even channels, 'odd' for odd channels, 'all' for all channels
+
+# =================================================================================================
+
+## CONSTANTS
+# DAQ Constants
+BITS_PER_SAMPLE = 24
+HEADER_LEN = 1
+TERM_LEN = 1
+HEADER_VALUE = 0xAA
+TERMINATOR_VALUE = 0xFF
+VREF = 2.4
+GAIN = 12
+UNIT_MULTIPLIER = 1_000_000
+ON_ELECTRODE_CHANNEL_COUNT = 8
+
+# Plotting Constants
+CONVERTED_RAW_DATA_BUFFER_SIZE = int(TIME_TO_SHOW*SAMPLING_RATE)
+NUM_SAMPLE_TO_SHOW = int(TIME_TO_SHOW*SAMPLING_RATE)
