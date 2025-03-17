@@ -4,7 +4,7 @@ import time
 import threading
 import h5py
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, CONVERTED_RAW_DATA_BUFFER_SIZE, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE
+from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE, UNIT_MULTIPLIER
 
 class Daq(abstractthread):
     def __init__(self):
@@ -25,6 +25,7 @@ class Daq(abstractthread):
         self.__startTime = time.time()
         self.__samplesCount = 0
         self.__samplesCountPerSecond = 0
+        self.__unitMultiplier = UNIT_MULTIPLIER
 
         self.__connect_thread = threading.Thread(target=self.connect)
         self.__connect_thread.daemon = True
@@ -85,7 +86,7 @@ class Daq(abstractthread):
             return []
 
     def convertByteArrayToData(self, byteArray):
-        multiplier = (2 * (VREF / GAIN)) / (2 ** self.__bitsPerSample)  # Adjust for the configured bit resolution
+        multiplier = ((2 * (VREF / GAIN)) / (2 ** self.__bitsPerSample))*self.__unitMultiplier  # Adjust for the configured bit resolution
         header = byteArray[0]  # first byte is the data type
         data = byteArray[1:-1]  # the data is from the second byte to the second last byte
         term = byteArray[-1]  # last byte is the terminator
@@ -111,6 +112,15 @@ class Daq(abstractthread):
         data_voltage = data_voltage.T
     
         return header_int, data_voltage, term
+    
+    def setUnitMultiplier(self, unitMultiplier=1_000):
+        self.__unitMultiplier = unitMultiplier
+        if self.__unitMultiplier == 1_000:
+            return "mV"
+        elif self.__unitMultiplier == 1_000_000:
+            return "uV"
+        else:
+            return "Invalid unit multiplier"
 
     def sendDataToBuffer(self):
         packages = self.readData()
