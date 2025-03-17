@@ -3,7 +3,7 @@
 # Configuration variables
 
 ## DAQ configuration
-USE_MOCK_DATA = True
+USE_MOCK_DATA = False
 MOCK_TYPE = "SineWave" # "SineWave", "TriangleWave", "ChannelNumber"
 COM_PORT = 'COM5'
 BAUDRATE = 1250000
@@ -23,6 +23,7 @@ ON_ELECTRODE_CHANNEL_COUNT = 8
 TIME_TO_SHOW = 1.5
 CONVERTED_RAW_DATA_BUFFER_SIZE = int(TIME_TO_SHOW*SAMPLING_RATE)
 NUM_SAMPLE_TO_SHOW = int(TIME_TO_SHOW*SAMPLING_RATE)
+AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 
 ## Filter configuration
 HIGH_PASS_FILTER = 0.25
