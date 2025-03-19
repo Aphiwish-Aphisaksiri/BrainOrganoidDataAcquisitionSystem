@@ -5,7 +5,11 @@
 ## DAQ configuration
 USE_MOCK_DATA = False
 MOCK_TYPE = "SineWave" # "SineWave", "TriangleWave", "ChannelNumber"
-COM_PORT = 'COM5'
+COM_PORT = ['COM5', 'COM6']
+CHANNEL_ASSIGNMENT = {
+    'COM5': [1, 2, 3, 4],
+    'COM6': [5, 6, 7, 8]
+}
 BAUDRATE = 1250000
 SAMPLING_RATE = 8000
 CHANNELS_NUMBER = 4
@@ -30,6 +34,7 @@ RECORD_CHANNELS = "even" # 'even' for even channels, 'odd' for odd channels, 'al
 
 ## CONSTANTS
 # DAQ Constants
+CHANNELS_PER_PORT = len(CHANNEL_ASSIGNMENT[COM_PORT[0]])
 BITS_PER_SAMPLE = 24
 HEADER_LEN = 1
 TERM_LEN = 1

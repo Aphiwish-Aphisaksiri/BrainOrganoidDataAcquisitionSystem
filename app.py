@@ -1,5 +1,6 @@
 from daq.daq import Daq
 from daq.mockdaq import MockDaq
+from daq.datasynchronize import DataSynchronize
 from preprocess.filter import Filter
 from ui.ui_rawplot import UiRawPlot
 from record.record import Record
@@ -10,13 +11,17 @@ from ui.mockRawData import MockRawData
 from ui.ui_dataProc import UiDataProc
 from ui.ui_filteredplot import UiFilteredPlot
 from ui.ui_record import UiRecord
-from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE
+from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT
 
 class App():
     def __init__(self):
         # Variables
         self.__channelsNumber = CHANNELS_NUMBER
-        self.__rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+        self.__rawDataBufferInstances = []
+        for port in COM_PORT:
+            rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+            self.__rawDataBufferInstances.append(rawDataBuffer)
+        self.__synchronizedDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
 
@@ -24,15 +29,21 @@ class App():
         if USE_MOCK_DATA:
             self.__daq = MockDaq(MOCK_TYPE)
             # self.__daq = MockRawData()
-            self.__daq.assignBuffer(self.__rawDataBuffer)
+            self.__daq.assignBuffer(self.__synchronizedDataBuffer)
             self.__daq.assignRecordBuffer(self.__recordBuffer)
         else:
-            self.__daq = Daq()
-            self.__daq.assignBuffer(self.__rawDataBuffer)
-            self.__daq.assignRecordBuffer(self.__recordBuffer)
+            self.__daqInstances = []
+            for daqIndex in range(len(COM_PORT)):
+                daq = Daq(daqIndex)
+                daq.assignBuffer(self.__rawDataBufferInstances[daqIndex])
+                self.__daqInstances.append(daq)
+
+        self.__dataSynchronize = DataSynchronize()
+        self.__dataSynchronize.assignRawDataBuffer(self.__rawDataBufferInstances)
+        self.__dataSynchronize.assignSynchronizedDataBuffer(self.__synchronizedDataBuffer)
 
         self.__filter = Filter()
-        self.__filter.assignInletBuffer(self.__rawDataBuffer)
+        self.__filter.assignInletBuffer(self.__synchronizedDataBuffer)
         self.__filter.assignOutletBuffer(self.__filteredDataBuffer)
 
         self.__uiFilter = UiDataProc(self.__filter)
@@ -58,7 +69,8 @@ class App():
         self.__uiRecord.assignRecord(self.__record)
 
     def renderApp(self):
-        self.__daq.startThread()
+        for daqIndex in range(len(COM_PORT)):
+            self.__daqInstances[daqIndex].startThread()
         self.__uiRecord.render()
         self.__filter.startThread()
         self.__uiFilter.render()
@@ -77,5 +89,6 @@ class App():
         self.__uiRecord.stopThread()
         self.__record.stopThread()
         self.__record.close()
-        self.__daq.close()
-        self.__daq.stopThread()
+        for daqIndex in range(len(COM_PORT)):
+            self.__daqInstances[daqIndex].stopThread()
+            self.__daqInstances[daqIndex].close()

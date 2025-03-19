@@ -4,12 +4,12 @@ import time
 import threading
 import h5py
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE, UNIT_MULTIPLIER
+from util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE, UNIT_MULTIPLIER, CHANNELS_PER_PORT
 
 class Daq(abstractthread):
-    def __init__(self):
+    def __init__(self, daqIndex):
         super().__init__()
-        self.__channelsNumber = CHANNELS_NUMBER
+        self.__channelsNumber = CHANNELS_PER_PORT
         self.__bitsPerSample = BITS_PER_SAMPLE
         self.__headerLen = HEADER_LEN
         self.__termLen = TERM_LEN
@@ -17,7 +17,7 @@ class Daq(abstractthread):
         self.__payloadLen = -(-self.__channelsNumber * self.__bitsPerSample * self.__samplesPerPackage // 8) # Weird -(-) is used to ceil the division
         self.__packageLen = self.__headerLen + self.__payloadLen + self.__termLen
 
-        self.__port = COM_PORT
+        self.__port = COM_PORT[daqIndex]
         self.__baudrate = BAUDRATE
         self.__reconnect_interval = 5  # seconds
         self.__ser = None
@@ -129,7 +129,7 @@ class Daq(abstractthread):
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
             self.__rawDataBuffer.addMultipleData(data)
-            self.sendDataToRecordBuffer(data)
+            # self.sendDataToRecordBuffer(data)
 
     def sendDataToRecordBuffer(self, data):
         self.__recordBuffer.addMultipleData(data)
