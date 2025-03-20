@@ -11,7 +11,7 @@ from ui.mockRawData import MockRawData
 from ui.ui_dataProc import UiDataProc
 from ui.ui_filteredplot import UiFilteredPlot
 from ui.ui_record import UiRecord
-from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT
+from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT, CHANNEL_ASSIGNMENT
 
 class App():
     def __init__(self):
@@ -19,11 +19,13 @@ class App():
         self.__channelsNumber = CHANNELS_NUMBER
         self.__rawDataBufferInstances = []
         for port in COM_PORT:
-            rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+            rawDataBuffer = Buffer(numChannel=len(CHANNEL_ASSIGNMENT[port]), numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
             self.__rawDataBufferInstances.append(rawDataBuffer)
         self.__synchronizedDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+
+        self.configChecker()
 
     def initializeThreads(self):
         if USE_MOCK_DATA:
@@ -39,7 +41,8 @@ class App():
                 self.__daqInstances.append(daq)
 
         self.__dataSynchronize = DataSynchronize()
-        self.__dataSynchronize.assignRawDataBuffer(self.__rawDataBufferInstances)
+        for daqIndex in range(len(COM_PORT)):
+            self.__dataSynchronize.assignRawDataBuffer(self.__rawDataBufferInstances[daqIndex], daqIndex)
         self.__dataSynchronize.assignSynchronizedDataBuffer(self.__synchronizedDataBuffer)
 
         self.__filter = Filter()
@@ -49,8 +52,8 @@ class App():
         self.__uiFilter = UiDataProc(self.__filter)
         self.__uiFilter.assignFilter(self.__filter)
 
-        self.__uiRawPlot = UiRawPlot(self.__daq)
-        self.__uiRawPlot.assignBuffer(self.__rawDataBuffer)
+        self.__uiRawPlot = UiRawPlot(self.__daqInstances[0])
+        self.__uiRawPlot.assignBuffer(self.__synchronizedDataBuffer)
 
         self.__uiFilteredPlot = UiFilteredPlot()
         self.__uiFilteredPlot.assignBuffer(self.__filteredDataBuffer)
@@ -92,3 +95,21 @@ class App():
         for daqIndex in range(len(COM_PORT)):
             self.__daqInstances[daqIndex].stopThread()
             self.__daqInstances[daqIndex].close()
+
+    def configChecker(self):
+        if RECORD_FORMAT not in ["mat", "h5"]:
+            print("Invalid RECORD_FORMAT in config.py")
+            exit()
+        if MOCK_TYPE not in ["SineWave", "TriangleWave", "ChannelNumber"]:
+            print("Invalid MOCK_TYPE in config.py")
+            exit()
+        if len(COM_PORT) != len(CHANNEL_ASSIGNMENT):
+            print("COM_PORT and CHANNEL_ASSIGNMENT in config.py do not match")
+            exit()
+        for port in COM_PORT:
+            if port not in CHANNEL_ASSIGNMENT:
+                print("COM_PORT and CHANNEL_ASSIGNMENT in config.py do not match")
+                exit()
+            if len(CHANNEL_ASSIGNMENT[port])*len(CHANNEL_ASSIGNMENT) != CHANNELS_NUMBER:
+                print("CHANNEL_ASSIGNMENT in config.py does not match CHANNELS_NUMBER")
+                exit()
