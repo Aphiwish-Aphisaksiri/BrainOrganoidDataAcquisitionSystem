@@ -5,10 +5,10 @@
 ## DAQ configuration
 USE_MOCK_DATA = False
 MOCK_TYPE = "SineWave" # "SineWave", "TriangleWave", "ChannelNumber"
-COM_PORT = ['COM5', 'COM6']
+COM_PORT = ['COM5', 'COM8']
 CHANNEL_ASSIGNMENT = {
-    'COM5': [1, 2, 3, 4],
-    'COM6': [5, 6, 7, 8]
+    COM_PORT[0]: [1, 2, 3, 4],
+    COM_PORT[1]: [5, 6, 7, 8]
 }
 BAUDRATE = 1250000
 SAMPLING_RATE = 8000
