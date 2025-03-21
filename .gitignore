@@ -19,3 +19,4 @@ filtereddatarecord/*
 # Ignore build and dist folders
 build/
 dist/
+main.spec
