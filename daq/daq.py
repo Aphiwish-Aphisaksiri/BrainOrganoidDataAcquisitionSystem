@@ -26,6 +26,7 @@ class Daq(abstractthread):
         self.__samplesCount = 0
         self.__samplesCountPerSecond = 0
         self.__unitMultiplier = UNIT_MULTIPLIER
+        self.__daqIndex = daqIndex
 
         self.__connect_thread = threading.Thread(target=self.connect)
         self.__connect_thread.daemon = True
@@ -72,7 +73,7 @@ class Daq(abstractthread):
 
                 currentTime = time.time()
                 if currentTime - self.__startTime >= 1:
-                    print(f"Samples received in the last second: {self.__samplesCount}")
+                    print(f"{COM_PORT[self.__daqIndex]}-Samples received in the last second: {self.__samplesCount}")
                     self.__samplesCountPerSecond = self.__samplesCount
                     self.__samplesCount = 0
                     self.__startTime = currentTime

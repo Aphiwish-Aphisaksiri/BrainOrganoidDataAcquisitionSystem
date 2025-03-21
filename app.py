@@ -41,8 +41,7 @@ class App():
                 self.__daqInstances.append(daq)
 
         self.__dataSynchronize = DataSynchronize()
-        for daqIndex in range(len(COM_PORT)):
-            self.__dataSynchronize.assignRawDataBuffer(self.__rawDataBufferInstances[daqIndex], daqIndex)
+        self.__dataSynchronize.assignRawDataBufferInstances(self.__rawDataBufferInstances)
         self.__dataSynchronize.assignSynchronizedDataBuffer(self.__synchronizedDataBuffer)
 
         self.__filter = Filter()
@@ -74,6 +73,7 @@ class App():
     def renderApp(self):
         for daqIndex in range(len(COM_PORT)):
             self.__daqInstances[daqIndex].startThread()
+        self.__dataSynchronize.startThread()
         self.__uiRecord.render()
         self.__filter.startThread()
         self.__uiFilter.render()
@@ -92,6 +92,7 @@ class App():
         self.__uiRecord.stopThread()
         self.__record.stopThread()
         self.__record.close()
+        self.__dataSynchronize.stopThread()
         for daqIndex in range(len(COM_PORT)):
             self.__daqInstances[daqIndex].stopThread()
             self.__daqInstances[daqIndex].close()

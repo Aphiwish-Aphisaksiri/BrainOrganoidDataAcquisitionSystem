@@ -1,6 +1,6 @@
 import numpy as np
 from util.abstractthread import abstractthread
-from util.config import CHANNELS_NUMBER, CHANNELS_PER_PORT, CONVERTED_RAW_DATA_BUFFER_SIZE
+from util.config import CHANNELS_NUMBER, CHANNELS_PER_PORT, CONVERTED_RAW_DATA_BUFFER_SIZE, COM_PORT
 
 class DataSynchronize(abstractthread):
     def __init__(self):
@@ -10,11 +10,10 @@ class DataSynchronize(abstractthread):
         self.__synchronizedDataBuffer = None
         self.__recordDataBuffer = None
 
-    def assignRawDataBuffer(self, buffer, instance_index):
+    def assignRawDataBufferInstances(self, buffer):
         # Ensure the list is large enough to hold buffers for all instances
-        while len(self.__rawDataBuffers) <= instance_index:
-            self.__rawDataBuffers.append(None)
-        self.__rawDataBuffers[instance_index] = buffer
+        for port in range(len(COM_PORT)):
+            self.__rawDataBuffers.append(buffer[port])
 
     def assignSynchronizedDataBuffer(self, buffer):
         self.__synchronizedDataBuffer = buffer
@@ -34,10 +33,10 @@ class DataSynchronize(abstractthread):
             combined_data.append(raw_data)
 
         # Combine data along the channel axis
-        synchronized_data = np.hstack(combined_data)  # Combine along the second axis (channels)
+        synchronized_data = np.vstack(combined_data)  # Combine along the second axis (channels)
 
         # Ensure the shape is (CONVERTED_RAW_DATA_BUFFER_SIZE, CHANNELS_NUMBER)
-        if synchronized_data.shape != (CONVERTED_RAW_DATA_BUFFER_SIZE, self.__channelsNumber):
+        if synchronized_data.shape != (self.__channelsNumber, CONVERTED_RAW_DATA_BUFFER_SIZE, ):
             raise ValueError(f"Unexpected synchronized data shape: {synchronized_data.shape}")
 
         # Add synchronized data to the synchronized data buffer
