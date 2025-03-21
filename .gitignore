@@ -20,4 +20,7 @@ filtereddatarecord/*
 build/
 dist/
 *.spec
-*.egg-info/
+*egg-info/
+build.py
+app_obfuscate.py
+boas.py
