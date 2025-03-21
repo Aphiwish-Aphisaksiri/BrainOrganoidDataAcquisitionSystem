@@ -1,17 +1,17 @@
-from daq.daq import Daq
-from daq.mockdaq import MockDaq
-from daq.datasynchronize import DataSynchronize
-from preprocess.filter import Filter
-from ui.ui_rawplot import UiRawPlot
-from record.record import Record
-from record.recordmat import RecordMat
-from util.abstractthread import abstractthread
-from util.buffer import Buffer
-from ui.mockRawData import MockRawData
-from ui.ui_dataProc import UiDataProc
-from ui.ui_filteredplot import UiFilteredPlot
-from ui.ui_record import UiRecord
-from util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT, CHANNEL_ASSIGNMENT
+from brainorganoid.daq.daq import Daq
+from brainorganoid.daq.mockdaq import MockDaq
+from brainorganoid.daq.datasynchronize import DataSynchronize
+from brainorganoid.preprocess.filter import Filter
+from brainorganoid.ui.ui_rawplot import UiRawPlot
+from brainorganoid.record.record import Record
+from brainorganoid.record.recordmat import RecordMat
+from brainorganoid.util.abstractthread import abstractthread
+from brainorganoid.util.buffer import Buffer
+from brainorganoid.ui.mockRawData import MockRawData
+from brainorganoid.ui.ui_dataProc import UiDataProc
+from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
+from brainorganoid.ui.ui_record import UiRecord
+from brainorganoid.util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT, CHANNEL_ASSIGNMENT
 
 class App():
     def __init__(self):

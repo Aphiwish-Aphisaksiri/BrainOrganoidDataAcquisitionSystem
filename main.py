@@ -2,7 +2,7 @@
 
 import os
 from app import App
-from util.uirender import initUiRender, renderUi
+from brainorganoid.util.uirender import initUiRender, renderUi
 
 def main():
     app = App()
