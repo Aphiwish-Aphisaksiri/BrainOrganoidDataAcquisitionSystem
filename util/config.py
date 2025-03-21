@@ -22,9 +22,6 @@ AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 ## Filter configuration
 HIGH_PASS_FILTER = 0.25
 LOW_PASS_FILTER = 1500
-FILTER_ORDER = 4
-NOTCH_FILTER = 50
-GAIN = 1
 
 ## Record configuration
 RECORD_FORMAT = "mat" # "mat", "h5"
@@ -48,3 +45,9 @@ ON_ELECTRODE_CHANNEL_COUNT = 8
 # Plotting Constants
 CONVERTED_RAW_DATA_BUFFER_SIZE = int(TIME_TO_SHOW*SAMPLING_RATE)
 NUM_SAMPLE_TO_SHOW = int(TIME_TO_SHOW*SAMPLING_RATE)
+
+# Filter Constants
+FILTER_ORDER = 4
+NOTCH_FILTER = 50
+GAIN = 1
+SAVE_FILTER_COEFFICIENT = False

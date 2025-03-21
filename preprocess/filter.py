@@ -2,7 +2,7 @@ from scipy.signal import butter, lfilter, iirnotch
 import numpy as np
 import json
 from util.abstractthread import abstractthread
-from util.config import HIGH_PASS_FILTER, LOW_PASS_FILTER, GAIN, NOTCH_FILTER, CHANNELS_NUMBER, SAMPLING_RATE, FILTER_ORDER
+from util.config import HIGH_PASS_FILTER, LOW_PASS_FILTER, GAIN, NOTCH_FILTER, CHANNELS_NUMBER, SAMPLING_RATE, FILTER_ORDER, SAVE_FILTER_COEFFICIENT
 
 class Filter(abstractthread):
     def __init__(self):
@@ -99,16 +99,17 @@ class Filter(abstractthread):
         return self.__gain
 
     def save_filter_coefficients(self, filename):
-        filter_coefficients = {
-            "bandpass": {
-                "b": self.__bandPassB.tolist(),
-                "a": self.__bandPassA.tolist()
-            },
-            "notch": {
-                "b": self.__notchB.tolist(),
-                "a": self.__notchA.tolist()
+        if SAVE_FILTER_COEFFICIENT:
+            filter_coefficients = {
+                "bandpass": {
+                    "b": self.__bandPassB.tolist(),
+                    "a": self.__bandPassA.tolist()
+                },
+                "notch": {
+                    "b": self.__notchB.tolist(),
+                    "a": self.__notchA.tolist()
+                }
             }
-        }
-        with open(filename, 'w') as f:
-            json.dump(filter_coefficients, f)
-        # print(f"Filter coefficients saved to {filename}")
+            with open(filename, 'w') as f:
+                json.dump(filter_coefficients, f)
+            # print(f"Filter coefficients saved to {filename}")
