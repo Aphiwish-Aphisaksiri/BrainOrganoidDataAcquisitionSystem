@@ -8,7 +8,7 @@ import sys
 # Add the root directory to the sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from util.config import SAMPLING_RATE
+from brainorganoid.util.config import SAMPLING_RATE
 
 def plot_frequency_response(filename):
     with open(filename, 'r') as f:

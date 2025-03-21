@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brainorganoid"
+version = "1.0.0"
+description = "Brain Organoid Data Acquisition System"
+authors = [{name = "Aphiwish Aphisaksiri", email = "aphiwish.aph@gmail.com"}]
+dependencies = ["numpy", "matplotlib", "dearpygui", "pyserial", ]
+
+[tool.setuptools]
+packages = ["brainorganoid", "brainorganoid.daq", "brainorganoid.preprocess", "brainorganoid.record", "brainorganoid.ui", "brainorganoid.util"]
