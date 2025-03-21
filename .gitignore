@@ -15,3 +15,7 @@ filtereddatarecord/*
 
 # Do not ignore the .gitkeep file in the filtereddatarecord folder
 !filtereddatarecord/.gitkeep
+
+# Ignore build and dist folders
+build/
+dist/
