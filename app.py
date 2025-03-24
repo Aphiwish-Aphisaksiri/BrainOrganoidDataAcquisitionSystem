@@ -1,31 +1,28 @@
 import logging
 from multiprocessing import Array
 from brainorganoid.daq.daqprocess import DaqProcess
-from brainorganoid.daq.mockdaq import MockDaq
 from brainorganoid.daq.datasynchronize import DataSynchronize
 from brainorganoid.preprocess.filter import Filter
 from brainorganoid.ui.ui_rawplot import UiRawPlot
 from brainorganoid.record.record import Record
 from brainorganoid.record.recordmat import RecordMat
-from brainorganoid.util.abstractthread import abstractthread
 from brainorganoid.util.buffer import Buffer
-from brainorganoid.ui.mockRawData import MockRawData
 from brainorganoid.ui.ui_dataProc import UiDataProc
 from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
 from brainorganoid.ui.ui_record import UiRecord
-from brainorganoid.util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT, CHANNEL_ASSIGNMENT
+from brainorganoid.util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, RECORD_FORMAT, COM_PORT, CHANNEL_ASSIGNMENT
 
 class App():
     def __init__(self):
         # Initialize logging
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         logging.info("Initializing application...")
+
         # Variables
         self.__channelsNumber = CHANNELS_NUMBER
-        self.__rawDataBufferInstances = []
-        for port in COM_PORT:
-            rawDataBuffer = Array('d', len(CHANNEL_ASSIGNMENT[port]) * CONVERTED_RAW_DATA_BUFFER_SIZE)
-            self.__rawDataBufferInstances.append(rawDataBuffer)
+        self.__rawDataBuffers = [
+            Array('d', CONVERTED_RAW_DATA_BUFFER_SIZE) for _ in range(CHANNELS_NUMBER)
+        ]  # Create a separate buffer for each channel
         self.__synchronizedDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
@@ -35,11 +32,14 @@ class App():
     def initializeProcesses(self):
         try:
             self.__daqProcesses = []
-            for daqIndex in range(len(COM_PORT)):
+            for daqIndex, port in enumerate(COM_PORT):
                 daqProcess = DaqProcess(daqIndex)
-                daqProcess.assignBuffer(self.__rawDataBufferInstances[daqIndex])
+                # Get the channel indices assigned to this COM_PORT from CHANNEL_ASSIGNMENT
+                assigned_channels = CHANNEL_ASSIGNMENT[port]
+                # Map the buffers for the assigned channels
+                buffers_for_channels = [self.__rawDataBuffers[channel - 1] for channel in assigned_channels]
+                daqProcess.assignBuffers(buffers_for_channels)
                 self.__daqProcesses.append(daqProcess)
-
         except Exception as e:
             logging.error(f"Error initializing processes: {e}")
             raise
@@ -47,7 +47,7 @@ class App():
     def initializeThreads(self):
         try:
             self.__dataSynchronize = DataSynchronize()
-            self.__dataSynchronize.assignRawDataBufferInstances(self.__rawDataBufferInstances)
+            self.__dataSynchronize.assignRawDataBufferInstances(self.__rawDataBuffers)
             self.__dataSynchronize.assignSynchronizedDataBuffer(self.__synchronizedDataBuffer)
 
             self.__filter = Filter()
@@ -57,7 +57,7 @@ class App():
             self.__uiFilter = UiDataProc(self.__filter)
             self.__uiFilter.assignFilter(self.__filter)
 
-            self.__uiRawPlot = UiRawPlot(self.__daqProcesses[0] if not USE_MOCK_DATA else self.__daq)
+            self.__uiRawPlot = UiRawPlot(self.__daqProcesses[0])
             self.__uiRawPlot.assignBuffer(self.__synchronizedDataBuffer)
 
             self.__uiFilteredPlot = UiFilteredPlot()
@@ -119,14 +119,12 @@ class App():
         try:
             if RECORD_FORMAT not in ["mat", "h5"]:
                 raise ValueError("Invalid RECORD_FORMAT in config.py")
-            if MOCK_TYPE not in ["SineWave", "TriangleWave", "ChannelNumber"]:
-                raise ValueError("Invalid MOCK_TYPE in config.py")
             if len(COM_PORT) != len(CHANNEL_ASSIGNMENT):
                 raise ValueError("COM_PORT and CHANNEL_ASSIGNMENT in config.py do not match")
             for port in COM_PORT:
                 if port not in CHANNEL_ASSIGNMENT:
                     raise ValueError("COM_PORT and CHANNEL_ASSIGNMENT in config.py do not match")
-                if len(CHANNEL_ASSIGNMENT[port]) * len(CHANNEL_ASSIGNMENT) != CHANNELS_NUMBER:
+                if sum(len(CHANNEL_ASSIGNMENT[p]) for p in COM_PORT) != CHANNELS_NUMBER:
                     raise ValueError("CHANNEL_ASSIGNMENT in config.py does not match CHANNELS_NUMBER")
         except ValueError as e:
             logging.error(e)

@@ -5,7 +5,7 @@
 ## DAQ configuration
 USE_MOCK_DATA = False
 MOCK_TYPE = "SineWave" # "SineWave", "TriangleWave", "ChannelNumber"
-COM_PORT = ['COM5', 'COM9']
+COM_PORT = ['COM5', 'COM10']
 CHANNEL_ASSIGNMENT = {
     COM_PORT[0]: [1, 2, 3, 4],
     COM_PORT[1]: [5, 6, 7, 8]

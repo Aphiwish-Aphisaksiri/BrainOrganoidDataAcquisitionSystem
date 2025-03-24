@@ -117,21 +117,30 @@ class DaqProcess(AbstractProcess):
         return header, data_voltage, term
 
     def sendDataToBuffer(self):
-        """Read, process, and send data to the buffer."""
+        """Read, process, and send data to the buffers."""
         packages = self.readData()
         if packages is None:
             return
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
-            with self.__bufferLock:  # Ensure thread-safe access to the shared buffer
-                # Write data to the shared buffer
-                flat_data = data.flatten()
-                for i in range(len(flat_data)):
-                    self.__rawDataBuffer[i] = flat_data[i]
+            with self.__bufferLock:  # Ensure thread-safe access to the shared buffers
+                for channel_index, channel_data in enumerate(data):
+                    # Access the shared buffer for the current channel
+                    buffer = np.frombuffer(self.__rawDataBuffers[channel_index].get_obj())
+    
+                    # Shift the existing data to the left to make room for new data
+                    num_new_samples = len(channel_data)
+                    buffer_size = len(buffer)
+                    if num_new_samples > buffer_size:
+                        raise ValueError(f"New data size ({num_new_samples}) exceeds buffer size ({buffer_size}).")
+    
+                    # Shift the buffer to the left and add new data to the end
+                    buffer[:-num_new_samples] = buffer[num_new_samples:]
+                    buffer[-num_new_samples:] = channel_data
 
-    def assignBuffer(self, target):
+    def assignBuffers(self, buffers):
         """Assign a multiprocessing.Array as the buffer."""
-        self.__rawDataBuffer = target
+        self.__rawDataBuffers = buffers
 
     def getSamplesCount(self):
         return self.__samplesCountPerSecond
