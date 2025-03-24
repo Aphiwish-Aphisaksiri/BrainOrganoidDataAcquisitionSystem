@@ -1,5 +1,4 @@
 from brainorganoid.util.abstractprocess import AbstractProcess
-from brainorganoid.util.buffer import Buffer
 from brainorganoid.util.config import (
     CHANNELS_PER_PORT, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE,
     VREF, GAIN, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE, UNIT_MULTIPLIER
@@ -8,12 +7,14 @@ import serial
 import numpy as np
 import logging
 import time
+from multiprocessing import Lock
 
 class DaqProcess(AbstractProcess):
     def __init__(self, daqIndex):
         super().__init__()
         self.__daqIndex = daqIndex
-        self.__rawDataBuffer = None
+        self.__rawDataBuffer = None  # This will be a multiprocessing.Array
+        self.__bufferLock = Lock()  # Lock for thread-safe access to the shared buffer
         self.__channelsNumber = CHANNELS_PER_PORT
         self.__bitsPerSample = BITS_PER_SAMPLE
         self.__headerLen = HEADER_LEN
@@ -122,9 +123,14 @@ class DaqProcess(AbstractProcess):
             return
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
-            self.__rawDataBuffer.addMultipleData(data)
+            with self.__bufferLock:  # Ensure thread-safe access to the shared buffer
+                # Write data to the shared buffer
+                flat_data = data.flatten()
+                for i in range(len(flat_data)):
+                    self.__rawDataBuffer[i] = flat_data[i]
 
     def assignBuffer(self, target):
+        """Assign a multiprocessing.Array as the buffer."""
         self.__rawDataBuffer = target
 
     def getSamplesCount(self):

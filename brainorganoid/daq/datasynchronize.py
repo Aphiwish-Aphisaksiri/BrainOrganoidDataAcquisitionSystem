@@ -10,10 +10,9 @@ class DataSynchronize(abstractthread):
         self.__synchronizedDataBuffer = None
         self.__recordDataBuffer = None
 
-    def assignRawDataBufferInstances(self, buffer):
-        # Ensure the list is large enough to hold buffers for all instances
-        for port in range(len(COM_PORT)):
-            self.__rawDataBuffers.append(buffer[port])
+    def assignRawDataBufferInstances(self, buffers):
+        """Assign raw data buffers (multiprocessing.Array) for all DAQ instances."""
+        self.__rawDataBuffers = buffers
 
     def assignSynchronizedDataBuffer(self, buffer):
         self.__synchronizedDataBuffer = buffer
@@ -29,14 +28,17 @@ class DataSynchronize(abstractthread):
         # Collect data from all raw data buffers
         combined_data = []
         for buffer in self.__rawDataBuffers:
-            raw_data = buffer.getData(reset_flag=False)  # Get data without resetting the flag
+            # Convert multiprocessing.Array to NumPy array
+            raw_data = np.frombuffer(buffer.get_obj())  # Convert shared memory to NumPy array
+            # Reshape the data to match the expected dimensions (channels x samples)
+            raw_data = raw_data.reshape((CHANNELS_PER_PORT, -1))
             combined_data.append(raw_data)
 
         # Combine data along the channel axis
-        synchronized_data = np.vstack(combined_data)  # Combine along the second axis (channels)
+        synchronized_data = np.vstack(combined_data)  # Combine along the first axis (channels)
 
-        # Ensure the shape is (CONVERTED_RAW_DATA_BUFFER_SIZE, CHANNELS_NUMBER)
-        if synchronized_data.shape != (self.__channelsNumber, CONVERTED_RAW_DATA_BUFFER_SIZE, ):
+        # Ensure the shape is (CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE)
+        if synchronized_data.shape != (self.__channelsNumber, CONVERTED_RAW_DATA_BUFFER_SIZE):
             raise ValueError(f"Unexpected synchronized data shape: {synchronized_data.shape}")
 
         # Add synchronized data to the synchronized data buffer

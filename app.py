@@ -1,4 +1,5 @@
 import logging
+from multiprocessing import Array
 from brainorganoid.daq.daqprocess import DaqProcess
 from brainorganoid.daq.mockdaq import MockDaq
 from brainorganoid.daq.datasynchronize import DataSynchronize
@@ -23,7 +24,7 @@ class App():
         self.__channelsNumber = CHANNELS_NUMBER
         self.__rawDataBufferInstances = []
         for port in COM_PORT:
-            rawDataBuffer = Buffer(numChannel=len(CHANNEL_ASSIGNMENT[port]), numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+            rawDataBuffer = Array('d', len(CHANNEL_ASSIGNMENT[port]) * CONVERTED_RAW_DATA_BUFFER_SIZE)
             self.__rawDataBufferInstances.append(rawDataBuffer)
         self.__synchronizedDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
