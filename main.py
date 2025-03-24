@@ -6,6 +6,7 @@ from brainorganoid.util.uirender import initUiRender, renderUi
 
 def main():
     app = App()
+    app.initializeProcesses()
     app.initializeThreads()
 
     ui_init_file_path = os.path.join(os.path.dirname(__file__), 'ui.ini')

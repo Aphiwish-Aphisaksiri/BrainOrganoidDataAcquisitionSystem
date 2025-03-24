@@ -1,5 +1,5 @@
 import logging
-from brainorganoid.daq.daq import Daq
+from brainorganoid.daq.daqprocess import DaqProcess
 from brainorganoid.daq.mockdaq import MockDaq
 from brainorganoid.daq.datasynchronize import DataSynchronize
 from brainorganoid.preprocess.filter import Filter
@@ -31,20 +31,20 @@ class App():
 
         self.configChecker()
 
+    def initializeProcesses(self):
+        try:
+            self.__daqProcesses = []
+            for daqIndex in range(len(COM_PORT)):
+                daqProcess = DaqProcess(daqIndex)
+                daqProcess.assignBuffer(self.__rawDataBufferInstances[daqIndex])
+                self.__daqProcesses.append(daqProcess)
+
+        except Exception as e:
+            logging.error(f"Error initializing processes: {e}")
+            raise
+
     def initializeThreads(self):
         try:
-            if USE_MOCK_DATA:
-                self.__daq = MockDaq(MOCK_TYPE)
-                # self.__daq = MockRawData()
-                self.__daq.assignBuffer(self.__synchronizedDataBuffer)
-                self.__daq.assignRecordBuffer(self.__recordBuffer)
-            else:
-                self.__daqInstances = []
-                for daqIndex in range(len(COM_PORT)):
-                    daq = Daq(daqIndex)
-                    daq.assignBuffer(self.__rawDataBufferInstances[daqIndex])
-                    self.__daqInstances.append(daq)
-
             self.__dataSynchronize = DataSynchronize()
             self.__dataSynchronize.assignRawDataBufferInstances(self.__rawDataBufferInstances)
             self.__dataSynchronize.assignSynchronizedDataBuffer(self.__synchronizedDataBuffer)
@@ -56,7 +56,7 @@ class App():
             self.__uiFilter = UiDataProc(self.__filter)
             self.__uiFilter.assignFilter(self.__filter)
 
-            self.__uiRawPlot = UiRawPlot(self.__daqInstances[0] if not USE_MOCK_DATA else self.__daq)
+            self.__uiRawPlot = UiRawPlot(self.__daqProcesses[0] if not USE_MOCK_DATA else self.__daq)
             self.__uiRawPlot.assignBuffer(self.__synchronizedDataBuffer)
 
             self.__uiFilteredPlot = UiFilteredPlot()
@@ -82,8 +82,8 @@ class App():
 
     def renderApp(self):
         try:
-            for daqIndex in range(len(COM_PORT)):
-                self.__daqInstances[daqIndex].startThread()
+            for daqProcess in self.__daqProcesses:
+                daqProcess.startProcess()
             self.__dataSynchronize.startThread()
             self.__uiRecord.render()
             self.__filter.startThread()
@@ -101,6 +101,8 @@ class App():
 
     def stopApp(self):
         try:
+            for daqProcess in self.__daqProcesses:
+                daqProcess.stopProcess()
             self.__uiFilteredPlot.stopThread()
             self.__uiRawPlot.stopThread()
             self.__uiFilter.stopThread()
@@ -109,9 +111,6 @@ class App():
             self.__record.stopThread()
             self.__record.close()
             self.__dataSynchronize.stopThread()
-            for daqIndex in range(len(COM_PORT)):
-                self.__daqInstances[daqIndex].stopThread()
-                self.__daqInstances[daqIndex].close()
         except Exception as e:
             logging.error(f"Error stopping application: {e}")
 
