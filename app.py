@@ -24,6 +24,9 @@ class App():
         self.__rawDataBuffers = [
             Array('d', CONVERTED_RAW_DATA_BUFFER_SIZE) for _ in range(CHANNELS_NUMBER)
         ]  # Create a separate buffer for each channel
+        self.__SamplesReceivedPerSecondBuffers = [
+            Array('d', 1) for _ in range(len(COM_PORT))
+        ]
         self.__synchronizedDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
@@ -40,6 +43,7 @@ class App():
                 # Map the buffers for the assigned channels
                 buffers_for_channels = [self.__rawDataBuffers[channel - 1] for channel in assigned_channels]
                 daqProcess.assignBuffers(buffers_for_channels)
+                daqProcess.assignSamplesReceivedPerSecondBuffer(self.__SamplesReceivedPerSecondBuffers[daqIndex])
                 self.__daqProcesses.append(daqProcess)
         except Exception as e:
             logging.error(f"Error initializing processes: {e}")
@@ -50,6 +54,8 @@ class App():
             self.__dataSynchronize = DataSynchronize()
             self.__dataSynchronize.assignRawDataBufferInstances(self.__rawDataBuffers)
             self.__dataSynchronize.assignSynchronizedDataBuffer(self.__synchronizedDataBuffer)
+            self.__dataSynchronize.assignRecordDataBuffer(self.__recordBuffer)
+            self.__dataSynchronize.assignSamplesReceivedPerSecondBuffers(self.__SamplesReceivedPerSecondBuffers)
 
             self.__filter = Filter()
             self.__filter.assignInletBuffer(self.__synchronizedDataBuffer)
@@ -58,7 +64,7 @@ class App():
             self.__uiFilter = UiDataProc(self.__filter)
             self.__uiFilter.assignFilter(self.__filter)
 
-            self.__uiRawPlot = UiRawPlot(self.__daqProcesses[0])
+            self.__uiRawPlot = UiRawPlot(self.__dataSynchronize)
             self.__uiRawPlot.assignBuffer(self.__synchronizedDataBuffer)
 
             self.__uiFilteredPlot = UiFilteredPlot()

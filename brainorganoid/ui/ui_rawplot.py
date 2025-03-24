@@ -6,7 +6,7 @@ from brainorganoid.util.abstractthread import abstractthread
 from brainorganoid.util.config import CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER
 
 class UiRawPlot(abstractthread):
-    def __init__(self, daqThread):
+    def __init__(self, dataSynchronizeThread):
         super().__init__()
         self.setThreadFrequency(30)
         self.__channelsNumber = CHANNELS_NUMBER
@@ -19,7 +19,7 @@ class UiRawPlot(abstractthread):
 
         self.__realTimePlot = True
 
-        self.__daqThread = daqThread
+        self.__dataSynchronizeThread = dataSynchronizeThread
 
         self.__autoFitMode = AUTO_FIT_MODE
         self.__unitMultiplier = UNIT_MULTIPLIER
@@ -86,7 +86,7 @@ class UiRawPlot(abstractthread):
 
             if time.time() - self.starttime >= 1:
                 self.starttime = time.time()
-                samples_count = self.__daqThread.getSamplesCount()
+                samples_count = self.__dataSynchronizeThread.getSamplesReceivedPerSecond()
                 dpg.set_value("txt_SampleReceived", str(samples_count)+"/"+str(SAMPLING_RATE))
 
     def toggleAutoFitMode(self):
@@ -99,8 +99,10 @@ class UiRawPlot(abstractthread):
         self.fitGraph()
 
     def toggleUnitMultiplier(self):
-        self.__unitMultiplier = 1_000 if self.__unitMultiplier == 1_000_000 else 1_000_000
-        dpg.configure_item("btn_toggle_unit", label=self.__daqThread.setUnitMultiplier(self.__unitMultiplier))
+        pass
+        # TODO: Make this work again
+        #self.__unitMultiplier = 1_000 if self.__unitMultiplier == 1_000_000 else 1_000_000
+        #dpg.configure_item("btn_toggle_unit", label=self.__daqThread.setUnitMultiplier(self.__unitMultiplier))
 
     def fitGraph(self):
         pass

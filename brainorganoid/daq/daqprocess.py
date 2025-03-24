@@ -77,6 +77,7 @@ class DaqProcess(AbstractProcess):
 
                 currentTime = time.time()
                 if currentTime - self.__startTime >= 1:
+                    self.__samplesReceivedPerSecondBuffer[0] = self.__samplesCount
                     logging.info(f"{self.__port}-Samples received in the last second: {self.__samplesCount}")
                     self.__samplesCountPerSecond = self.__samplesCount
                     self.__samplesCount = 0
@@ -144,6 +145,10 @@ class DaqProcess(AbstractProcess):
     def assignBuffers(self, buffers):
         """Assign a multiprocessing.Array as the buffer."""
         self.__rawDataBuffers = buffers
+
+    def assignSamplesReceivedPerSecondBuffer(self, buffer):
+        """Assign a multiprocessing.Array to store the samples received per second."""
+        self.__samplesReceivedPerSecondBuffer = buffer
 
     def getSamplesCount(self):
         return self.__samplesCountPerSecond

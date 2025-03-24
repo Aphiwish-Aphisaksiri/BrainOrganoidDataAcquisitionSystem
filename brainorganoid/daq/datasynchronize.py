@@ -1,4 +1,5 @@
 import numpy as np
+import time
 from brainorganoid.util.abstractthread import abstractthread
 from brainorganoid.util.config import CHANNELS_NUMBER, CHANNEL_ASSIGNMENT, CONVERTED_RAW_DATA_BUFFER_SIZE, COM_PORT
 
@@ -9,6 +10,8 @@ class DataSynchronize(abstractthread):
         self.__rawDataBuffers = []  # List to hold raw data buffers from multiple DAQ instances
         self.__synchronizedDataBuffer = None
         self.__recordDataBuffer = None
+        self.__samplesReceivedPerSecond = 0
+        self.__startTime = time.time()
 
     def assignRawDataBufferInstances(self, buffers):
         """Assign raw data buffers (multiprocessing.Array) for all DAQ instances."""
@@ -20,10 +23,23 @@ class DataSynchronize(abstractthread):
     def assignRecordDataBuffer(self, buffer):
         self.__recordDataBuffer = buffer
 
+    def assignSamplesReceivedPerSecondBuffers(self, buffers):
+        self.__samplesReceivedPerSecondBuffers = buffers
+
+    def getSamplesReceivedPerSecond(self):
+        return self.__samplesReceivedPerSecond
+
     def update(self):
         if not self.__rawDataBuffers or None in self.__rawDataBuffers:
             print("Not all raw data buffers are assigned.")
             return
+        
+        currentTime = time.time()
+        if currentTime - self.__startTime >= 1:
+            self.__startTime = currentTime
+            self.__samplesReceivedPerSecond = 0
+            for com_port in range(len(COM_PORT)):
+                self.__samplesReceivedPerSecond += sum(np.frombuffer(self.__samplesReceivedPerSecondBuffers[com_port].get_obj()))
     
         # Initialize an empty array to hold synchronized data
         synchronized_data = np.zeros((self.__channelsNumber, CONVERTED_RAW_DATA_BUFFER_SIZE))
