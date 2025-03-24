@@ -36,6 +36,9 @@ class DaqProcess(AbstractProcess):
     def connect(self):
         """Establish a connection to the serial port."""
         while self.__ser is None:
+            if self._stopEvent.is_set():  # Check if the stop signal is set
+                logging.info(f"Stopping reconnect attempts for {self.__port}")
+                return
             try:
                 self.__ser = serial.Serial(
                     self.__port,
@@ -147,6 +150,9 @@ class DaqProcess(AbstractProcess):
 
     def update(self):
         """Override the update method to handle data acquisition."""
+        if self._stopEvent.is_set():  # Check if the stop signal is set
+            logging.info(f"Stopping data acquisition for {self.__port}")
+            return
         if self.__ser is None:
             self.connect()
         self.sendDataToBuffer()

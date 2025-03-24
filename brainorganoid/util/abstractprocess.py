@@ -1,7 +1,7 @@
 from multiprocessing import Process, Event
 import time
 
-DEFAULT_PROCESS_PERIOD = 0.1  # Seconds
+DEFAULT_PROCESS_PERIOD = 0.01  # Seconds
 
 class AbstractProcess:
     def __init__(self):
