@@ -10,6 +10,7 @@ from brainorganoid.util.buffer import Buffer
 from brainorganoid.ui.ui_dataProc import UiDataProc
 from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
 from brainorganoid.ui.ui_record import UiRecord
+from brainorganoid.ui.ui_settings import UiSettings
 from brainorganoid.util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, RECORD_FORMAT, COM_PORT, CHANNEL_ASSIGNMENT
 
 class App():
@@ -66,6 +67,8 @@ class App():
             self.__record = self.initializeRecord()
             self.__uiRecord = UiRecord(self.__record)
             self.__uiRecord.assignRecord(self.__record)
+
+            self.__uiSettings = UiSettings(self)
         except Exception as e:
             logging.error(f"Error initializing threads: {e}")
             raise
@@ -95,23 +98,33 @@ class App():
             self.__uiFilteredPlot.render()
             self.__uiFilteredPlot.startThread()
             self.__record.startThread()
+
+            self.__uiSettings.render()
         except Exception as e:
             logging.error(f"Error rendering application: {e}")
             self.stopApp()
             raise
 
     def stopApp(self):
+        """Stop all processes and threads gracefully."""
         try:
+            logging.info("Stopping application...")
+            # Stop all DAQ processes
             for daqProcess in self.__daqProcesses:
                 daqProcess.stopProcess()
+    
+            # Stop all threads
             self.__uiFilteredPlot.stopThread()
             self.__uiRawPlot.stopThread()
             self.__uiFilter.stopThread()
             self.__filter.stopThread()
             self.__uiRecord.stopThread()
             self.__record.stopThread()
-            self.__record.close()
             self.__dataSynchronize.stopThread()
+    
+            # Close resources
+            self.__record.close()
+            logging.info("Application stopped successfully.")
         except Exception as e:
             logging.error(f"Error stopping application: {e}")
 

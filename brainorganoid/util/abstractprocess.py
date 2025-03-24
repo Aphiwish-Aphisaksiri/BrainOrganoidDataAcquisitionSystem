@@ -27,7 +27,8 @@ class AbstractProcess:
     def stopProcess(self):
         """Stop the process."""
         self._stopEvent.set()
-        self._process.join()
+        if self._process.is_alive():
+            self._process.join()
 
     def setProcessPeriod(self, period):
         """Set the process execution period."""
