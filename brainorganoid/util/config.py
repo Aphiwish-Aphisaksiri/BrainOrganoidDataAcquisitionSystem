@@ -1,4 +1,4 @@
-# FILE: util/config.py
+# FILE: brainorganoid/util/config.py
 
 # Configuration variables
 
