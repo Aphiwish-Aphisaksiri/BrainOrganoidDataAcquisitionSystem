@@ -1,4 +1,5 @@
 from brainorganoid.util.abstractprocess import AbstractProcess
+from brainorganoid.util.arraybuffer import ArrayBuffer
 from brainorganoid.util.config import (
     CHANNELS_PER_PORT, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE,
     VREF, GAIN, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE, UNIT_MULTIPLIER
@@ -13,7 +14,7 @@ class DaqProcess(AbstractProcess):
     def __init__(self, daqIndex):
         super().__init__()
         self.__daqIndex = daqIndex
-        self.__rawDataBuffer = None  # This will be a multiprocessing.Array
+        self.__rawDataBuffer = None  # This will be an ArrayBuffer
         self.__bufferLock = Lock()  # Lock for thread-safe access to the shared buffer
         self.__channelsNumber = CHANNELS_PER_PORT
         self.__bitsPerSample = BITS_PER_SAMPLE
@@ -77,7 +78,10 @@ class DaqProcess(AbstractProcess):
 
                 currentTime = time.time()
                 if currentTime - self.__startTime >= 1:
-                    self.__samplesReceivedPerSecondBuffer[0] = self.__samplesCount
+                    # Use addMultipleDataToChannel to update the ArrayBuffer
+                    self.__samplesReceivedPerSecondBuffer.addMultipleDataToChannel(
+                        [self.__samplesCount], self.__daqIndex
+                    )
                     logging.info(f"{self.__port}-Samples received in the last second: {self.__samplesCount}")
                     self.__samplesCountPerSecond = self.__samplesCount
                     self.__samplesCount = 0
@@ -127,28 +131,28 @@ class DaqProcess(AbstractProcess):
             return
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
-            with self.__bufferLock:  # Ensure thread-safe access to the shared buffers
-                for channel_index, channel_data in enumerate(data):
-                    # Access the shared buffer for the current channel
-                    buffer = np.frombuffer(self.__rawDataBuffers[channel_index].get_obj())
-    
-                    # Shift the existing data to the left to make room for new data
-                    num_new_samples = len(channel_data)
-                    buffer_size = len(buffer)
-                    if num_new_samples > buffer_size:
-                        raise ValueError(f"New data size ({num_new_samples}) exceeds buffer size ({buffer_size}).")
-    
-                    # Shift the buffer to the left and add new data to the end
-                    buffer[:-num_new_samples] = buffer[num_new_samples:]
-                    buffer[-num_new_samples:] = channel_data
+            # Add data to the respective channels using addMultipleDataToChannel
+            for i, channel_data in enumerate(data):
+                channel_index = self.__assignedChannels[i] - 1  # Map to 0-based index
+                self.__rawDataBuffer.addMultipleDataToChannel(channel_data, channel_index)
 
-    def assignBuffers(self, buffers):
-        """Assign a multiprocessing.Array as the buffer."""
-        self.__rawDataBuffers = buffers
+    def assignBuffers(self, rawDataBuffer, assigned_channels):
+        """
+        Assign the ArrayBuffer for raw data and map it to the assigned channels.
+        :param rawDataBuffer: The ArrayBuffer instance for raw data.
+        :param assigned_channels: List of channel indices assigned to this DAQ process.
+        """
+        self.__rawDataBuffer = rawDataBuffer
+        self.__assignedChannels = assigned_channels
 
-    def assignSamplesReceivedPerSecondBuffer(self, buffer):
-        """Assign a multiprocessing.Array to store the samples received per second."""
+    def assignSamplesReceivedPerSecondBuffer(self, buffer, index):
+        """
+        Assign the ArrayBuffer for samples received per second.
+        :param buffer: The ArrayBuffer instance for samples received per second.
+        :param index: The index in the buffer corresponding to this DAQ process.
+        """
         self.__samplesReceivedPerSecondBuffer = buffer
+        self.__samplesReceivedPerSecondIndex = index
 
     def getSamplesCount(self):
         return self.__samplesCountPerSecond

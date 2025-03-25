@@ -71,6 +71,26 @@ class ArrayBuffer:
                 channel[-numPoints:] = data[i]
             self.__isUpdated = True
 
+    def addMultipleDataToChannel(self, data, channel_index):
+        """
+        Add multiple data points to a specific channel in the buffer.
+        :param data: A 1D array of data points to be added to the channel.
+        :param channel_index: The index of the channel where the data should be added.
+        """
+        numPoints = len(data)
+        if channel_index < 0 or channel_index >= self.__numChannel:
+            raise ValueError(f"Channel index must be between 0 and {self.__numChannel - 1}, but got {channel_index}")
+        if numPoints > self.__numSample:
+            raise ValueError(f"Input data has more points ({numPoints}) than buffer can hold ({self.__numSample})")
+    
+        with self.__lock:
+            # Access the specific channel
+            channel = self.__data[channel_index]
+            # Shift the existing data to the left and add the new data at the end
+            channel[:-numPoints] = channel[numPoints:]
+            channel[-numPoints:] = data
+            self.__isUpdated = True
+
     def getData(self, reset_flag=True):
         """
         Get the current data in the buffer as a NumPy array.

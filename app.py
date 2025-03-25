@@ -7,6 +7,7 @@ from brainorganoid.ui.ui_rawplot import UiRawPlot
 from brainorganoid.record.record import Record
 from brainorganoid.record.recordmat import RecordMat
 from brainorganoid.util.buffer import Buffer
+from brainorganoid.util.arraybuffer import ArrayBuffer
 from brainorganoid.ui.ui_dataProc import UiDataProc
 from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
 from brainorganoid.ui.ui_record import UiRecord
@@ -21,12 +22,8 @@ class App():
 
         # Variables
         self.__channelsNumber = CHANNELS_NUMBER
-        self.__rawDataBuffers = [
-            Array('d', CONVERTED_RAW_DATA_BUFFER_SIZE) for _ in range(CHANNELS_NUMBER)
-        ]  # Create a separate buffer for each channel
-        self.__SamplesReceivedPerSecondBuffers = [
-            Array('d', 1) for _ in range(len(COM_PORT))
-        ]
+        self.__rawDataBuffers = ArrayBuffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE, dtype='d')
+        self.__SamplesReceivedPerSecondBuffers = ArrayBuffer(numChannel=len(COM_PORT), numSample=1, dtype='d')
         self.__synchronizedDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
@@ -41,9 +38,8 @@ class App():
                 # Get the channel indices assigned to this COM_PORT from CHANNEL_ASSIGNMENT
                 assigned_channels = CHANNEL_ASSIGNMENT[port]
                 # Map the buffers for the assigned channels
-                buffers_for_channels = [self.__rawDataBuffers[channel - 1] for channel in assigned_channels]
-                daqProcess.assignBuffers(buffers_for_channels)
-                daqProcess.assignSamplesReceivedPerSecondBuffer(self.__SamplesReceivedPerSecondBuffers[daqIndex])
+                daqProcess.assignBuffers(self.__rawDataBuffers, assigned_channels)
+                daqProcess.assignSamplesReceivedPerSecondBuffer(self.__SamplesReceivedPerSecondBuffers, daqIndex)
                 self.__daqProcesses.append(daqProcess)
         except Exception as e:
             logging.error(f"Error initializing processes: {e}")
