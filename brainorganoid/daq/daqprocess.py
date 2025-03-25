@@ -131,20 +131,29 @@ class DaqProcess(AbstractProcess):
                 for channel_index, channel_data in enumerate(data):
                     # Access the shared buffer for the current channel
                     buffer = np.frombuffer(self.__rawDataBuffers[channel_index].get_obj())
-    
+                    
                     # Shift the existing data to the left to make room for new data
                     num_new_samples = len(channel_data)
                     buffer_size = len(buffer)
                     if num_new_samples > buffer_size:
                         raise ValueError(f"New data size ({num_new_samples}) exceeds buffer size ({buffer_size}).")
-    
+                    
                     # Shift the buffer to the left and add new data to the end
                     buffer[:-num_new_samples] = buffer[num_new_samples:]
                     buffer[-num_new_samples:] = channel_data
+    
+                    # Also send the data to the record buffer
+                    record_buffer = np.frombuffer(self.__recordBuffer.get_obj())
+                    record_buffer[:-num_new_samples] = record_buffer[num_new_samples:]
+                    record_buffer[-num_new_samples:] = channel_data
 
-    def assignBuffers(self, buffers):
+    def assignRawDataBuffers(self, buffers):
         """Assign a multiprocessing.Array as the buffer."""
         self.__rawDataBuffers = buffers
+
+    def assignRecordBuffer(self, buffer):
+        """Assign a multiprocessing.Array to store the recorded data."""
+        self.__recordBuffer = buffer
 
     def assignSamplesReceivedPerSecondBuffer(self, buffer):
         """Assign a multiprocessing.Array to store the samples received per second."""
