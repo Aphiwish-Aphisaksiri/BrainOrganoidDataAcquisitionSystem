@@ -10,7 +10,7 @@ class DataSynchronize(abstractthread):
         self.__rawDataBuffers = []  # List to hold raw data buffers from multiple DAQ instances
         self.__synchronizedDataBuffer = None
         self.__recordDataBuffer = None
-        self.__samplesReceivedPerSecond = 0
+        self.__samplesReceivedPerSecond = np.zeros(len(COM_PORT))
         self.__startTime = time.time()
 
     def assignRawDataBufferInstances(self, buffers):
@@ -27,19 +27,26 @@ class DataSynchronize(abstractthread):
         self.__samplesReceivedPerSecondBuffers = buffers
 
     def getSamplesReceivedPerSecond(self):
-        return self.__samplesReceivedPerSecond
+        """Return a formatted string of samples received per second for each COM_PORT."""
+        return ", ".join(
+            f"{com_port}: {int(self.__samplesReceivedPerSecond[daq_index])}"
+            for daq_index, com_port in enumerate(COM_PORT)
+        )
 
     def update(self):
         if not self.__rawDataBuffers or None in self.__rawDataBuffers:
             print("Not all raw data buffers are assigned.")
             return
-        
+    
         currentTime = time.time()
         if currentTime - self.__startTime >= 1:
             self.__startTime = currentTime
-            self.__samplesReceivedPerSecond = 0
-            for com_port in range(len(COM_PORT)):
-                self.__samplesReceivedPerSecond += sum(np.frombuffer(self.__samplesReceivedPerSecondBuffers[com_port].get_obj()))
+            self.__samplesReceivedPerSecond = np.zeros(len(COM_PORT))  # Reset the array
+    
+            # Iterate over COM_PORT and their corresponding indices
+            for daq_index, com_port in enumerate(COM_PORT):
+                # Accumulate the samples received per second for each DAQ process
+                self.__samplesReceivedPerSecond[daq_index] = np.frombuffer(self.__samplesReceivedPerSecondBuffers[daq_index].get_obj())[0]
     
         # Initialize an empty array to hold synchronized data
         synchronized_data = np.zeros((self.__channelsNumber, CONVERTED_RAW_DATA_BUFFER_SIZE))

@@ -3,7 +3,7 @@ import time
 import numpy as np
 import dearpygui.dearpygui as dpg
 from brainorganoid.util.abstractthread import abstractthread
-from brainorganoid.util.config import CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER
+from brainorganoid.util.config import CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER, COM_PORT
 
 class UiRawPlot(abstractthread):
     def __init__(self, dataSynchronizeThread):
@@ -33,7 +33,8 @@ class UiRawPlot(abstractthread):
             dpg.add_text("Auto fit mode:")
             dpg.add_button(label="Each Channel", callback=self.toggleAutoFitMode, tag="btn_ToggleAutoFitMode", width=100)
             dpg.add_text("  |  ")
-            dpg.add_input_text(label="Sample received per second", default_value="0", enabled=False, tag="txt_SampleReceived", width=80)
+            SPSWidth = len(COM_PORT)*80
+            dpg.add_input_text(label="Sample received per second", default_value="0", enabled=False, tag="txt_SampleReceived", width=SPSWidth)
             dpg.add_text("  |  ")
             dpg.add_text("Unit:")
             dpg.add_button(label="uV", callback=self.toggleUnitMultiplier, tag="btn_toggle_unit", width=50)
@@ -87,7 +88,7 @@ class UiRawPlot(abstractthread):
             if time.time() - self.starttime >= 1:
                 self.starttime = time.time()
                 samples_count = self.__dataSynchronizeThread.getSamplesReceivedPerSecond()
-                dpg.set_value("txt_SampleReceived", str(samples_count)+"/"+str(SAMPLING_RATE))
+                dpg.set_value("txt_SampleReceived", str(samples_count))
 
     def toggleAutoFitMode(self):
         if self.__autoFitMode == "eachChannel":
