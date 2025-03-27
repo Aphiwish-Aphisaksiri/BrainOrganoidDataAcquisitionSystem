@@ -6,6 +6,7 @@ from brainorganoid.record.record import Record
 from brainorganoid.record.recordmat import RecordMat
 from brainorganoid.util.abstractthread import abstractthread
 from brainorganoid.util.buffer import Buffer
+from brainorganoid.util.circularbuffer import CircularBuffer
 from brainorganoid.ui.mockRawData import MockRawData
 from brainorganoid.ui.ui_dataProc import UiDataProc
 from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
@@ -16,7 +17,7 @@ class App():
     def __init__(self):
         # Variables
         self.__channelsNumber = CHANNELS_NUMBER
-        self.__rawDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+        self.__rawDataBuffer = CircularBuffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         # self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=RECORD_BUFFER_SIZE)
 

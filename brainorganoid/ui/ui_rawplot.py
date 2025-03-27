@@ -56,6 +56,12 @@ class UiRawPlot(abstractthread):
         if self.__realTimePlot:
             self.count += 1
             self.__buffer = self.__rawDataBuffer.getData(reset_flag=False)
+    
+            # Check if the buffer is empty
+            if self.__buffer.size == 0 or self.__buffer.shape[1] == 0:
+                print("Buffer is empty. Skipping update.")
+                return
+    
             if self.__autoFitMode == "eachChannel":
                 for i in range(self.__channelsNumber):
                     lineHandler = self.__uiLineSeriesHandlerList[i]
@@ -66,8 +72,8 @@ class UiRawPlot(abstractthread):
                         y_min -= 0.1
                         y_max += 0.1
                     else:
-                        y_min = y_min - 0.1*y_range
-                        y_max = y_max + 0.1*y_range
+                        y_min = y_min - 0.1 * y_range
+                        y_max = y_max + 0.1 * y_range
                     dpg.set_axis_limits(f"CH{i+1}", y_min, y_max)
             elif self.__autoFitMode == "allChannel":
                 for i in range(self.__channelsNumber):
@@ -79,16 +85,16 @@ class UiRawPlot(abstractthread):
                         y_min -= 0.1
                         y_max += 0.1
                     else:
-                        y_min = y_min - 0.1*y_range
-                        y_max = y_max + 0.1*y_range
+                        y_min = y_min - 0.1 * y_range
+                        y_max = y_max + 0.1 * y_range
                     dpg.set_axis_limits(f"CH{i+1}", y_min, y_max)
             else:
                 print("Invalid auto fit mode")
-
+    
             if time.time() - self.starttime >= 1:
                 self.starttime = time.time()
                 samples_count = self.__daqThread.getSamplesCount()
-                dpg.set_value("txt_SampleReceived", str(samples_count)+"/"+str(SAMPLING_RATE))
+                dpg.set_value("txt_SampleReceived", str(samples_count) + "/" + str(SAMPLING_RATE))
 
     def toggleAutoFitMode(self):
         if self.__autoFitMode == "eachChannel":
