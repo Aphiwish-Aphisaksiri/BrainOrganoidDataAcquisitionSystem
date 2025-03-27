@@ -1,0 +1,20 @@
+-brainorganoid is now a package so if anything happen do 
+pip install .
+
+-The program can be run by using terminal by
+python main.py
+
+--The program can also be obfuscated using pyarmor with
+pyarmor gen -r -i brainorganoid
+-The obfuscated version of the brainorganoid package will be in
+dist/brainorganoid
+--You can also run the obfuscated version by
+python boas.py
+-Which will run the obfuscated version of the package
+--The obfuscated package can be packaged into an application using
+pyinstaller --onefile --add-data "ui.ini;." boas.py
+
+--the program can be automatically packaged into an application by running
+python build.py
+-which will obfuscate the code first by pyarmor and then package with pyinstaller
+-The application will be in dist/

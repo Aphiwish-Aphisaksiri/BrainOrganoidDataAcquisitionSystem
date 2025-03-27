@@ -12,7 +12,7 @@ CHANNELS_NUMBER = 4
 SAMPLES_PER_PACKAGE = 2
 
 ## Plotting configuration
-TIME_TO_SHOW = 1.5
+TIME_TO_SHOW = 4
 AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 
 ## Filter configuration
@@ -46,3 +46,6 @@ FILTER_ORDER = 4
 NOTCH_FILTER = 50
 GAIN = 1
 SAVE_FILTER_COEFFICIENT = False
+
+# Record Constants
+RECORD_BUFFER_SIZE = SAMPLING_RATE
