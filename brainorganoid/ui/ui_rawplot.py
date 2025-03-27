@@ -25,6 +25,9 @@ class UiRawPlot(abstractthread):
         self.__autoFitMode = AUTO_FIT_MODE
         self.__unitMultiplier = UNIT_MULTIPLIER
 
+        self.__cursorStart = 0
+        self.__cursorEnd = NUM_SAMPLE_TO_SHOW
+
     def render(self):
         self.__uiWindowHandler = dpg.add_window(label="Raw Signal Viewer", width=800, height=600)
         with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
@@ -41,6 +44,19 @@ class UiRawPlot(abstractthread):
             if USE_MOCK_DATA:
                 dpg.add_text("  |  ")
                 dpg.add_text("Mock Data Type: "+MOCK_TYPE)
+        with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
+            dpg.add_text("Cursor:")
+            dpg.add_input_int(default_value=self.__cursorStart, tag="input_int_start_cursor", width=100)
+            dpg.add_text("to")
+            dpg.add_input_int(default_value=self.__cursorEnd, tag="input_int_end_cursor", width=100)
+            dpg.add_button(label="Confirm", tag="btn_confirm_cursor", width=70, callback=self.setCursor)
+        with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
+            dpg.add_input_text(tag="cursor_setting_feedback",
+                               default_value="Cursor setting feedback",
+                               width=260,
+                               height=100,
+                               readonly=True,
+                               multiline=True)
         self.__uiSubplotHandler = dpg.add_subplots(rows=self.__channelsNumber, columns=1, width=-1, height=-1, no_title=True, parent=self.__uiWindowHandler)
         self.__uiLineSeriesHandlerList = []    
         for i in range(self.__channelsNumber):
@@ -120,3 +136,7 @@ class UiRawPlot(abstractthread):
     def toggleRealTimePlot(self):
         self.__realTimePlot = not self.__realTimePlot
         dpg.configure_item("btn_ToggleRealTimePlot", label="Stop" if self.__realTimePlot else "Continue")
+
+    def setCursor(self):
+        self.__cursorStart = dpg.get_value("input_int_start_cursor")
+        self.__cursorEnd = dpg.get_value("input_int_end_cursor")
