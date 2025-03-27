@@ -13,7 +13,8 @@ SAMPLES_PER_PACKAGE = 2
 DOWN_SAMPLING_FACTOR = 1
 
 ## Plotting configuration
-TIME_TO_SHOW = 10
+TIME_TO_SHOW = 1
+PLOT_MODE = "circular" # "circular", "linear"
 AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 
 ## Filter configuration

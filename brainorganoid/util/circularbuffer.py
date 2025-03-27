@@ -58,6 +58,18 @@ class CircularBuffer():
         if reset_flag:
             self.__isUpdated = False
 
+        if not self.__isFull:
+            # If the buffer is not full, return only the valid portion
+            return self.__data
+        else:
+            # If the buffer is full, return the data in the correct order
+            return np.hstack((self.__data[:, self.__writeIndex:], self.__data[:, :self.__writeIndex]))
+
+    def getCircularData(self, reset_flag=True):
+        # Reset the updated flag
+        if reset_flag:
+            self.__isUpdated = False
+
         return self.__data
         
     def isDataUpdated(self):

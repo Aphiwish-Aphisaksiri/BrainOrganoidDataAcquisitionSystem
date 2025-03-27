@@ -4,7 +4,7 @@ import numpy as np
 import dearpygui.dearpygui as dpg
 from brainorganoid.util.abstractthread import abstractthread
 from brainorganoid.util.config import (CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, 
-                                       MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER, REAL_TIME_PLOT)
+                                       MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER, REAL_TIME_PLOT, PLOT_MODE)
 
 class UiRawPlot(abstractthread):
     def __init__(self, daqThread):
@@ -55,7 +55,10 @@ class UiRawPlot(abstractthread):
     def update(self):
         if self.__realTimePlot:
             self.count += 1
-            self.__buffer = self.__rawDataBuffer.getData(reset_flag=False)
+            if PLOT_MODE == "circular":
+                self.__buffer = self.__rawDataBuffer.getCircularData(reset_flag=False)
+            elif PLOT_MODE == "linear":
+                self.__buffer = self.__rawDataBuffer.getData(reset_flag=True)
     
             # Check if the buffer is empty
             if self.__buffer.size == 0 or self.__buffer.shape[1] == 0:
