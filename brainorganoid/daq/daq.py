@@ -3,8 +3,11 @@ import numpy as np
 import time
 import threading
 import h5py
+import logging
 from brainorganoid.util.abstractthread import abstractthread
-from brainorganoid.util.config import CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, VREF, GAIN, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE, UNIT_MULTIPLIER
+from brainorganoid.util.config import (CHANNELS_NUMBER, BITS_PER_SAMPLE, HEADER_LEN, TERM_LEN, SAMPLES_PER_PACKAGE, 
+                                       VREF, GAIN, HEADER_VALUE, TERMINATOR_VALUE, COM_PORT, BAUDRATE, UNIT_MULTIPLIER,
+                                       DOWN_SAMPLING_FACTOR)
 
 class Daq(abstractthread):
     def __init__(self):
@@ -26,6 +29,7 @@ class Daq(abstractthread):
         self.__samplesCount = 0
         self.__samplesCountPerSecond = 0
         self.__unitMultiplier = UNIT_MULTIPLIER
+        self.__downSamplingFactor = DOWN_SAMPLING_FACTOR
 
         self.__connect_thread = threading.Thread(target=self.connect)
         self.__connect_thread.daemon = True
@@ -128,7 +132,8 @@ class Daq(abstractthread):
             return
         for package in packages:
             header, data, term = self.convertByteArrayToData(package)
-            self.__rawDataBuffer.addMultipleData(data)
+            downSampledData = data[:, ::self.__downSamplingFactor]
+            self.__rawDataBuffer.addMultipleData(downSampledData)
             self.sendDataToRecordBuffer(data)
 
     def sendDataToRecordBuffer(self, data):

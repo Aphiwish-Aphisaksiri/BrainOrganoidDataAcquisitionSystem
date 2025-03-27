@@ -3,7 +3,8 @@ import time
 import numpy as np
 import dearpygui.dearpygui as dpg
 from brainorganoid.util.abstractthread import abstractthread
-from brainorganoid.util.config import CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER
+from brainorganoid.util.config import (CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, 
+                                       MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER, REAL_TIME_PLOT)
 
 class UiRawPlot(abstractthread):
     def __init__(self, daqThread):
@@ -17,7 +18,7 @@ class UiRawPlot(abstractthread):
         self.count = 0
         self.starttime = time.time()
 
-        self.__realTimePlot = True
+        self.__realTimePlot = REAL_TIME_PLOT
 
         self.__daqThread = daqThread
 
