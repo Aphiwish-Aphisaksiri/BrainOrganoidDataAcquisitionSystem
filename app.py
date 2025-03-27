@@ -11,6 +11,7 @@ from brainorganoid.ui.mockRawData import MockRawData
 from brainorganoid.ui.ui_dataProc import UiDataProc
 from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
 from brainorganoid.ui.ui_record import UiRecord
+from brainorganoid.ui.ui_settings import UiSettings
 from brainorganoid.util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, RECORD_BUFFER_SIZE
 
 class App():
@@ -58,6 +59,8 @@ class App():
         self.__uiRecord = UiRecord(self.__record)
         self.__uiRecord.assignRecord(self.__record)
 
+        self.__uiSettings = UiSettings(self)
+
     def renderApp(self):
         self.__daq.startThread()
         self.__uiRecord.render()
@@ -69,6 +72,7 @@ class App():
         # self.__uiFilteredPlot.render()
         # self.__uiFilteredPlot.startThread()
         self.__record.startThread()
+        self.__uiSettings.render()
 
     def stopApp(self):
         # self.__uiFilteredPlot.stopThread()
