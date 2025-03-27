@@ -10,10 +10,10 @@ BAUDRATE = 1250000
 SAMPLING_RATE = 8000
 CHANNELS_NUMBER = 4
 SAMPLES_PER_PACKAGE = 2
-DOWN_SAMPLING_FACTOR = 1
+DOWN_SAMPLING_FACTOR = 2
 
 ## Plotting configuration
-TIME_TO_SHOW = 1
+TIME_TO_SHOW = 10
 PLOT_MODE = "circular" # "circular", "linear"
 AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 

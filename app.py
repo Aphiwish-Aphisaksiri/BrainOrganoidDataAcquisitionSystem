@@ -19,7 +19,7 @@ class App():
         self.__channelsNumber = CHANNELS_NUMBER
         self.__rawDataBuffer = CircularBuffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
         # self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
-        self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=RECORD_BUFFER_SIZE)
+        self.__recordBuffer = CircularBuffer(numChannel=self.__channelsNumber, numSample=RECORD_BUFFER_SIZE)
 
     def initializeThreads(self):
         if USE_MOCK_DATA:
