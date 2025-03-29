@@ -8,6 +8,7 @@ from brainorganoid.record.record import Record
 from brainorganoid.record.recordmat import RecordMat
 from brainorganoid.util.abstractthread import abstractthread
 from brainorganoid.util.buffer import Buffer
+from brainorganoid.util.circularbuffer import CircularBuffer
 from brainorganoid.ui.mockRawData import MockRawData
 from brainorganoid.ui.ui_dataProc import UiDataProc
 from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
@@ -23,11 +24,11 @@ class App():
         self.__channelsNumber = CHANNELS_NUMBER
         self.__rawDataBufferInstances = []
         for port in COM_PORT:
-            rawDataBuffer = Buffer(numChannel=len(CHANNEL_ASSIGNMENT[port]), numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+            rawDataBuffer = CircularBuffer(numChannel=len(CHANNEL_ASSIGNMENT[port]), numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
             self.__rawDataBufferInstances.append(rawDataBuffer)
-        self.__synchronizedDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
-        self.__filteredDataBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
-        self.__recordBuffer = Buffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+        self.__synchronizedDataBuffer = CircularBuffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+        # self.__filteredDataBuffer = CircularBuffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
+        self.__recordBuffer = CircularBuffer(numChannel=self.__channelsNumber, numSample=CONVERTED_RAW_DATA_BUFFER_SIZE)
 
         self.configChecker()
 
@@ -49,18 +50,18 @@ class App():
             self.__dataSynchronize.assignRawDataBufferInstances(self.__rawDataBufferInstances)
             self.__dataSynchronize.assignSynchronizedDataBuffer(self.__synchronizedDataBuffer)
 
-            self.__filter = Filter()
-            self.__filter.assignInletBuffer(self.__synchronizedDataBuffer)
-            self.__filter.assignOutletBuffer(self.__filteredDataBuffer)
+            # self.__filter = Filter()
+            # self.__filter.assignInletBuffer(self.__synchronizedDataBuffer)
+            # self.__filter.assignOutletBuffer(self.__filteredDataBuffer)
 
-            self.__uiFilter = UiDataProc(self.__filter)
-            self.__uiFilter.assignFilter(self.__filter)
+            # self.__uiFilter = UiDataProc(self.__filter)
+            # self.__uiFilter.assignFilter(self.__filter)
 
             self.__uiRawPlot = UiRawPlot(self.__daqInstances[0] if not USE_MOCK_DATA else self.__daq)
             self.__uiRawPlot.assignBuffer(self.__synchronizedDataBuffer)
 
-            self.__uiFilteredPlot = UiFilteredPlot()
-            self.__uiFilteredPlot.assignBuffer(self.__filteredDataBuffer)
+            # self.__uiFilteredPlot = UiFilteredPlot()
+            # self.__uiFilteredPlot.assignBuffer(self.__filteredDataBuffer)
 
             self.__record = self.initializeRecord()
             self.__uiRecord = UiRecord(self.__record)
@@ -86,13 +87,13 @@ class App():
                 self.__daqInstances[daqIndex].startThread()
             self.__dataSynchronize.startThread()
             self.__uiRecord.render()
-            self.__filter.startThread()
-            self.__uiFilter.render()
-            self.__uiFilter.startThread()
+            # self.__filter.startThread()
+            # self.__uiFilter.render()
+            # self.__uiFilter.startThread()
             self.__uiRawPlot.render()
             self.__uiRawPlot.startThread()
-            self.__uiFilteredPlot.render()
-            self.__uiFilteredPlot.startThread()
+            # self.__uiFilteredPlot.render()
+            # self.__uiFilteredPlot.startThread()
             self.__record.startThread()
         except Exception as e:
             logging.error(f"Error rendering application: {e}")
@@ -101,10 +102,10 @@ class App():
 
     def stopApp(self):
         try:
-            self.__uiFilteredPlot.stopThread()
+            # self.__uiFilteredPlot.stopThread()
             self.__uiRawPlot.stopThread()
-            self.__uiFilter.stopThread()
-            self.__filter.stopThread()
+            # self.__uiFilter.stopThread()
+            # self.__filter.stopThread()
             self.__uiRecord.stopThread()
             self.__record.stopThread()
             self.__record.close()
