@@ -47,7 +47,7 @@ REAL_TIME_PLOT = True
 # Filter Constants
 FILTER_ORDER = 4
 NOTCH_FILTER = 50
-GAIN = 1
+FILTER_GAIN = 1
 SAVE_FILTER_COEFFICIENT = False
 
 # Record Constants
