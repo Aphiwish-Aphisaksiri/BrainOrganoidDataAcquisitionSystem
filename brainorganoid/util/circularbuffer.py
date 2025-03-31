@@ -49,6 +49,20 @@ class CircularBuffer():
         # Set the updated flag
         self.__isUpdated = True
 
+    def addBatchData(self, data):
+        """
+        Add a batch of data points to the buffer.
+        :param data: A 2D array of shape (numChannel, numSample).
+        """
+        if data.shape[0] != self.__data.shape[0]:
+            raise ValueError(f"Input data must have shape ({self.__data.shape[0]}, numSample), but got {data.shape}")
+
+        numSamples = data.shape[1]
+        self.__data = data
+        
+        # Set the updated flag
+        self.__isUpdated = True
+
     def getData(self, reset_flag=True):
         """
         Retrieve the data from the buffer in the correct order.

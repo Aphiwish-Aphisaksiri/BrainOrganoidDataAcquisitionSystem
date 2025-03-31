@@ -5,7 +5,7 @@
 ## DAQ configuration
 USE_MOCK_DATA = False
 MOCK_TYPE = "SineWave" # "SineWave", "TriangleWave", "ChannelNumber"
-COM_PORT = ['COM5', 'COM9']
+COM_PORT = ['COM5', 'COM8']
 CHANNEL_ASSIGNMENT = {
     COM_PORT[0]: [1, 2, 3, 4],
     COM_PORT[1]: [5, 6, 7, 8]
@@ -16,7 +16,7 @@ CHANNELS_NUMBER = 8
 SAMPLES_PER_PACKAGE = 2
 
 ## Plotting configuration
-TIME_TO_SHOW = 1.5
+TIME_TO_SHOW = 3
 AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 
 ## Filter configuration

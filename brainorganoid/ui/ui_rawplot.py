@@ -54,7 +54,7 @@ class UiRawPlot(abstractthread):
     def update(self):
         if self.__realTimePlot:
             self.count += 1
-            self.__buffer = self.__rawDataBuffer.getData(reset_flag=False)
+            self.__buffer = self.__rawDataBuffer.getCircularData(reset_flag=False)
             if self.__autoFitMode == "eachChannel":
                 for i in range(self.__channelsNumber):
                     lineHandler = self.__uiLineSeriesHandlerList[i]
