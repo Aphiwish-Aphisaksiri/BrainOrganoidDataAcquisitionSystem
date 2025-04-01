@@ -50,4 +50,3 @@ class DataSynchronize(abstractthread):
                 buffer.resetIsFull() 
             if self.__recordDataBuffer:
                 self.__recordDataBuffer.addBatchData(synchronized_data)
-                print("ADDADADAD")
