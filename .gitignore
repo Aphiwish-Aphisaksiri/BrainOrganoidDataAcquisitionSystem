@@ -25,3 +25,4 @@ build.py
 app_obfuscate.py
 boas.py
 NOTE.txt
+*.pyc

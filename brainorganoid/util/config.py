@@ -17,7 +17,7 @@ SAMPLES_PER_PACKAGE = 2
 DOWN_SAMPLING_FACTOR = 2
 
 ## Plotting configuration
-TIME_TO_SHOW = 4
+TIME_TO_SHOW = 8
 AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 
 ## Filter configuration
