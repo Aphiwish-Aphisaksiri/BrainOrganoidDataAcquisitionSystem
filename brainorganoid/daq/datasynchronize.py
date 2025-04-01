@@ -1,6 +1,7 @@
 import numpy as np
 from brainorganoid.util.abstractthread import abstractthread
-from brainorganoid.util.config import CHANNELS_NUMBER, CHANNELS_PER_PORT, CONVERTED_RAW_DATA_BUFFER_SIZE, COM_PORT
+from brainorganoid.util.config import (CHANNELS_NUMBER, CHANNELS_PER_PORT, CONVERTED_RAW_DATA_BUFFER_SIZE, 
+                                       COM_PORT, RECORD_BUFFER_SIZE)
 
 class DataSynchronize(abstractthread):
     def __init__(self):
@@ -44,5 +45,9 @@ class DataSynchronize(abstractthread):
             self.__synchronizedDataBuffer.addBatchData(synchronized_data)
 
         # Optionally, add synchronized data to the record buffer
-        if self.__recordDataBuffer:
-            self.__recordDataBuffer.addBatchData(synchronized_data)
+        if all(buffer.isBufferFull() for buffer in self.__rawDataBuffers):
+            for buffer in self.__rawDataBuffers:
+                buffer.resetIsFull() 
+            if self.__recordDataBuffer:
+                self.__recordDataBuffer.addBatchData(synchronized_data)
+                print("ADDADADAD")

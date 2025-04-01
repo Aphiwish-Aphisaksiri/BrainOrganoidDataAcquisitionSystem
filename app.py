@@ -14,7 +14,9 @@ from brainorganoid.ui.ui_dataProc import UiDataProc
 from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
 from brainorganoid.ui.ui_record import UiRecord
 from brainorganoid.ui.ui_settings import UiSettings
-from brainorganoid.util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT, CHANNEL_ASSIGNMENT
+from brainorganoid.util.config import (CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, 
+                                       USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT, 
+                                       CHANNEL_ASSIGNMENT, RECORD_BUFFER_SIZE)
 
 class App():
     def __init__(self):
@@ -50,6 +52,7 @@ class App():
             self.__dataSynchronize = DataSynchronize()
             self.__dataSynchronize.assignRawDataBufferInstances(self.__rawDataBufferInstances)
             self.__dataSynchronize.assignSynchronizedDataBuffer(self.__synchronizedDataBuffer)
+            self.__dataSynchronize.assignRecordDataBuffer(self.__recordBuffer)
 
             # self.__filter = Filter()
             # self.__filter.assignInletBuffer(self.__synchronizedDataBuffer)

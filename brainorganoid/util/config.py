@@ -14,10 +14,10 @@ BAUDRATE = 1250000
 SAMPLING_RATE = 8000
 CHANNELS_NUMBER = 8
 SAMPLES_PER_PACKAGE = 2
-DOWN_SAMPLING_FACTOR = 2
+DOWN_SAMPLING_FACTOR = 1
 
 ## Plotting configuration
-TIME_TO_SHOW = 8
+TIME_TO_SHOW = 4
 AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 
 ## Filter configuration
@@ -27,6 +27,7 @@ LOW_PASS_FILTER = 1500
 ## Record configuration
 RECORD_FORMAT = "mat" # "mat", "h5"
 RECORD_CHANNELS = "even" # 'even' for even channels, 'odd' for odd channels, 'all' for all channels
+RECORD_BUFFER_SIZE = SAMPLING_RATE
 
 # =================================================================================================
 

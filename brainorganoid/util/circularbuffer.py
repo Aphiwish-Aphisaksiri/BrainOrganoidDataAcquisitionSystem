@@ -117,3 +117,10 @@ class CircularBuffer():
         self.__data.fill(0)
         self.__writeIndex = 0
         self.__isFull = False
+
+    def resetIsFull(self):
+        """
+        Clear Is Full flag
+        """
+        if self.__isFull:
+            self.__isFull = False
