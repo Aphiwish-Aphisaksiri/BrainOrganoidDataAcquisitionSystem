@@ -38,14 +38,11 @@ class DataSynchronize(abstractthread):
         # Ensure the shape is (CONVERTED_RAW_DATA_BUFFER_SIZE, CHANNELS_NUMBER)
         if synchronized_data.shape != (self.__channelsNumber, CONVERTED_RAW_DATA_BUFFER_SIZE, ):
             raise ValueError(f"Unexpected synchronized data shape: {synchronized_data.shape}")
-        
-        # Get Write index of the unsynchronized data buffer
-        write_index = self.__rawDataBuffers[0].getWriteIndex()
 
         # Add synchronized data to the synchronized data buffer
         if self.__synchronizedDataBuffer:
-            self.__synchronizedDataBuffer.addBatchData(synchronized_data, write_index)
+            self.__synchronizedDataBuffer.addBatchData(synchronized_data)
 
         # Optionally, add synchronized data to the record buffer
         if self.__recordDataBuffer:
-            self.__recordDataBuffer.addBatchData(synchronized_data, write_index)
+            self.__recordDataBuffer.addBatchData(synchronized_data)

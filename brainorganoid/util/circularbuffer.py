@@ -49,7 +49,7 @@ class CircularBuffer():
         # Set the updated flag
         self.__isUpdated = True
 
-    def addBatchData(self, data, WriteIndex=None):
+    def addBatchData(self, data):
         """
         Add a batch of data points to the buffer.
         :param data: A 2D array of shape (numChannel, numSample).
