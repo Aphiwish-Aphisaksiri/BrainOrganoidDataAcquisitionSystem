@@ -24,6 +24,12 @@ class UiRawPlot(abstractthread):
 
         self.__autoFitMode = AUTO_FIT_MODE
         self.__unitMultiplier = UNIT_MULTIPLIER
+        if self.__unitMultiplier == 1_000_000:
+            self.__unit = "uV"
+        elif self.__unitMultiplier == 1_000:
+            self.__unit = "mV"
+        else:
+            raise ValueError("Invalid unit multiplier")
 
         self.__cursorStart = 0
         self.__cursorEnd = NUM_SAMPLE_TO_SHOW
@@ -40,7 +46,7 @@ class UiRawPlot(abstractthread):
             dpg.add_input_text(label="Sample received per second", default_value="0", enabled=False, tag="txt_SampleReceived", width=80)
             dpg.add_text("  |  ")
             dpg.add_text("Unit:")
-            dpg.add_button(label="uV", callback=self.toggleUnitMultiplier, tag="btn_toggle_unit", width=50)
+            dpg.add_button(label=self.__unit, callback=self.toggleUnitMultiplier, tag="btn_toggle_unit", width=50)
             with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
                 dpg.add_text("Cursor:")
                 dpg.add_input_int(default_value=self.__cursorStart, tag="input_int_start_cursor", width=100)

@@ -13,6 +13,7 @@ from brainorganoid.ui.mockRawData import MockRawData
 from brainorganoid.ui.ui_dataProc import UiDataProc
 from brainorganoid.ui.ui_filteredplot import UiFilteredPlot
 from brainorganoid.ui.ui_record import UiRecord
+from brainorganoid.ui.ui_settings import UiSettings
 from brainorganoid.util.config import CHANNELS_NUMBER, CONVERTED_RAW_DATA_BUFFER_SIZE, USE_MOCK_DATA, RECORD_FORMAT, MOCK_TYPE, COM_PORT, CHANNEL_ASSIGNMENT
 
 class App():
@@ -66,6 +67,8 @@ class App():
             self.__record = self.initializeRecord()
             self.__uiRecord = UiRecord(self.__record)
             self.__uiRecord.assignRecord(self.__record)
+
+            self.__uiSettings = UiSettings(self)
         except Exception as e:
             logging.error(f"Error initializing threads: {e}")
             raise
@@ -95,6 +98,7 @@ class App():
             # self.__uiFilteredPlot.render()
             # self.__uiFilteredPlot.startThread()
             self.__record.startThread()
+            self.__uiSettings.render()
         except Exception as e:
             logging.error(f"Error rendering application: {e}")
             self.stopApp()
@@ -113,6 +117,7 @@ class App():
             for daqIndex in range(len(COM_PORT)):
                 self.__daqInstances[daqIndex].stopThread()
                 self.__daqInstances[daqIndex].close()
+            self.__uiSettings.stopThread()
         except Exception as e:
             logging.error(f"Error stopping application: {e}")
 
