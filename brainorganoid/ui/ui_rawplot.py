@@ -50,7 +50,7 @@ class UiRawPlot(abstractthread):
                 dpg.add_input_text(tag="cursor_setting_feedback",
                                 default_value="Cursor setting feedback",
                                 width=350,
-                                height=100,
+                                height=120,
                                 readonly=True,
                                 multiline=True)
             if USE_MOCK_DATA:

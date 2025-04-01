@@ -16,7 +16,7 @@ CHANNELS_NUMBER = 8
 SAMPLES_PER_PACKAGE = 2
 
 ## Plotting configuration
-TIME_TO_SHOW = 3
+TIME_TO_SHOW = 4
 AUTO_FIT_MODE = "eachChannel" # "eachChannel", "allChannel"
 
 ## Filter configuration
