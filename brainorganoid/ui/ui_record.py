@@ -1,6 +1,8 @@
 import dearpygui.dearpygui as dpg
 from brainorganoid.util.abstractthread import abstractthread
-from brainorganoid.util.config import CHANNELS_NUMBER, SAMPLES_PER_PACKAGE, RECORD_CHANNELS, ON_ELECTRODE_CHANNEL_COUNT, SAMPLING_RATE
+from brainorganoid.util.config import (CHANNELS_NUMBER, SAMPLES_PER_PACKAGE, RECORD_CHANNELS, 
+                                       ON_ELECTRODE_CHANNEL_COUNT, SAMPLING_RATE, TIME_TO_SHOW,
+                                       DOWN_SAMPLING_FACTOR)
 
 class UiRecord(abstractthread):
     def __init__(self, recordThread):
@@ -47,6 +49,8 @@ class UiRecord(abstractthread):
             dpg.add_text(f"Number of Channels: {CHANNELS_NUMBER} Channel(s)")
             dpg.add_text(f"Stacking samples: {SAMPLES_PER_PACKAGE} Sample(s)")
             dpg.add_text(f"Sampling rate: {SAMPLING_RATE} Hz")
+            dpg.add_text(f"Time to show: {TIME_TO_SHOW} s")
+            dpg.add_text(f"Down sampling factor: {DOWN_SAMPLING_FACTOR}x")
             dpg.add_text("____________________________________________________")
             dpg.add_text("|Recording Control|")
             with dpg.group(horizontal=True):

@@ -3,7 +3,8 @@ import time
 import numpy as np
 import dearpygui.dearpygui as dpg
 from brainorganoid.util.abstractthread import abstractthread
-from brainorganoid.util.config import CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER
+from brainorganoid.util.config import (CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, 
+                                       MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER, TIME_TO_SHOW)
 
 class UiRawPlot(abstractthread):
     def __init__(self, daqThread):
@@ -45,7 +46,6 @@ class UiRawPlot(abstractthread):
                 dpg.add_input_int(default_value=self.__cursorStart, tag="input_int_start_cursor", width=100)
                 dpg.add_text("to")
                 dpg.add_input_int(default_value=self.__cursorEnd, tag="input_int_end_cursor", width=100)
-                dpg.add_button(label="Confirm", tag="btn_confirm_cursor", width=70, callback=self.setCursor)
             with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
                 dpg.add_input_text(tag="cursor_setting_feedback",
                                 default_value="Cursor setting feedback",
