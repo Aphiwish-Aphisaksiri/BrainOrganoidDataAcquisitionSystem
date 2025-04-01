@@ -29,7 +29,7 @@ class DataSynchronize(abstractthread):
         # Collect data from all raw data buffers
         combined_data = []
         for buffer in self.__rawDataBuffers:
-            raw_data = buffer.getData(reset_flag=False)  # Get data without resetting the flag
+            raw_data = buffer.getCircularData(reset_flag=False)  # Get data without resetting the flag
             combined_data.append(raw_data)
 
         # Combine data along the channel axis
@@ -38,11 +38,14 @@ class DataSynchronize(abstractthread):
         # Ensure the shape is (CONVERTED_RAW_DATA_BUFFER_SIZE, CHANNELS_NUMBER)
         if synchronized_data.shape != (self.__channelsNumber, CONVERTED_RAW_DATA_BUFFER_SIZE, ):
             raise ValueError(f"Unexpected synchronized data shape: {synchronized_data.shape}")
+        
+        # Get Write index of the unsynchronized data buffer
+        write_index = self.__rawDataBuffers[0].getWriteIndex()
 
         # Add synchronized data to the synchronized data buffer
         if self.__synchronizedDataBuffer:
-            self.__synchronizedDataBuffer.addBatchData(synchronized_data)
+            self.__synchronizedDataBuffer.addBatchData(synchronized_data, write_index)
 
         # Optionally, add synchronized data to the record buffer
         if self.__recordDataBuffer:
-            self.__recordDataBuffer.addBatchData(synchronized_data)
+            self.__recordDataBuffer.addBatchData(synchronized_data, write_index)

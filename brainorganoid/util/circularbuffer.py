@@ -49,7 +49,7 @@ class CircularBuffer():
         # Set the updated flag
         self.__isUpdated = True
 
-    def addBatchData(self, data):
+    def addBatchData(self, data, WriteIndex=None):
         """
         Add a batch of data points to the buffer.
         :param data: A 2D array of shape (numChannel, numSample).
@@ -62,6 +62,9 @@ class CircularBuffer():
         
         # Set the updated flag
         self.__isUpdated = True
+
+        # Set the full flag
+        self.__isFull = True
 
     def getData(self, reset_flag=True):
         """
@@ -85,6 +88,13 @@ class CircularBuffer():
             self.__isUpdated = False
 
         return self.__data
+    
+    def getWriteIndex(self):
+        """
+        Get the current write index.
+        :return: The current write index.
+        """
+        return self.__writeIndex
         
     def isDataUpdated(self):
         """
