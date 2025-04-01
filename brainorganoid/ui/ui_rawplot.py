@@ -24,6 +24,9 @@ class UiRawPlot(abstractthread):
         self.__autoFitMode = AUTO_FIT_MODE
         self.__unitMultiplier = UNIT_MULTIPLIER
 
+        self.__cursorStart = 0
+        self.__cursorEnd = NUM_SAMPLE_TO_SHOW
+
     def render(self):
         self.__uiWindowHandler = dpg.add_window(label="Raw Signal Viewer", width=800, height=600)
         with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
@@ -37,6 +40,19 @@ class UiRawPlot(abstractthread):
             dpg.add_text("  |  ")
             dpg.add_text("Unit:")
             dpg.add_button(label="uV", callback=self.toggleUnitMultiplier, tag="btn_toggle_unit", width=50)
+            with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
+                dpg.add_text("Cursor:")
+                dpg.add_input_int(default_value=self.__cursorStart, tag="input_int_start_cursor", width=100)
+                dpg.add_text("to")
+                dpg.add_input_int(default_value=self.__cursorEnd, tag="input_int_end_cursor", width=100)
+                dpg.add_button(label="Confirm", tag="btn_confirm_cursor", width=70, callback=self.setCursor)
+            with dpg.group(horizontal=True, parent=self.__uiWindowHandler):
+                dpg.add_input_text(tag="cursor_setting_feedback",
+                                default_value="Cursor setting feedback",
+                                width=350,
+                                height=100,
+                                readonly=True,
+                                multiline=True)
             if USE_MOCK_DATA:
                 dpg.add_text("  |  ")
                 dpg.add_text("Mock Data Type: "+MOCK_TYPE)
@@ -84,10 +100,12 @@ class UiRawPlot(abstractthread):
             else:
                 print("Invalid auto fit mode")
 
-            if time.time() - self.starttime >= 1:
-                self.starttime = time.time()
-                samples_count = self.__daqThread.getSamplesCount()
-                dpg.set_value("txt_SampleReceived", str(samples_count)+"/"+str(SAMPLING_RATE))
+        if time.time() - self.starttime >= 1:
+            self.starttime = time.time()
+            samples_count = self.__daqThread.getSamplesCount()
+            dpg.set_value("txt_SampleReceived", str(samples_count) + "/" + str(SAMPLING_RATE))
+
+            self.setCursor()
 
     def toggleAutoFitMode(self):
         if self.__autoFitMode == "eachChannel":
@@ -110,3 +128,25 @@ class UiRawPlot(abstractthread):
     def toggleRealTimePlot(self):
         self.__realTimePlot = not self.__realTimePlot
         dpg.configure_item("btn_ToggleRealTimePlot", label="Stop" if self.__realTimePlot else "Continue")
+
+    def setCursor(self):
+        self.__cursorStart = dpg.get_value("input_int_start_cursor")
+        self.__cursorEnd = dpg.get_value("input_int_end_cursor")
+            
+        # Validate cursor range
+        if self.__cursorStart < 0 or self.__cursorEnd > self.__buffer.shape[1] or self.__cursorStart >= self.__cursorEnd:
+            dpg.set_value("cursor_setting_feedback", "Invalid cursor range. Please adjust the values.")
+            return
+    
+        # Extract the data in the specified range
+        data_in_range = self.__buffer[:, self.__cursorStart:self.__cursorEnd]
+    
+        # Calculate max and min for each channel
+        feedback = "Channel Max/Min Values:\n"
+        for i in range(self.__channelsNumber):
+            channel_max = np.max(data_in_range[i])
+            channel_min = np.min(data_in_range[i])
+            feedback += f"CH{i+1}: Max = {channel_max:.2f}, Min = {channel_min:.2f}, Dif = {channel_max-channel_min:.4f}\n"
+    
+        # Update the feedback text
+        dpg.set_value("cursor_setting_feedback", feedback)
