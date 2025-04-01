@@ -58,7 +58,7 @@ class App():
             # self.__uiFilter = UiDataProc(self.__filter)
             # self.__uiFilter.assignFilter(self.__filter)
 
-            self.__uiRawPlot = UiRawPlot(self.__daqInstances[0] if not USE_MOCK_DATA else self.__daq)
+            self.__uiRawPlot = UiRawPlot(self.__daqInstances if not USE_MOCK_DATA else self.__daq)
             self.__uiRawPlot.assignBuffer(self.__synchronizedDataBuffer)
 
             # self.__uiFilteredPlot = UiFilteredPlot()

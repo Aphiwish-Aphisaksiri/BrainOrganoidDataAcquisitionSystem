@@ -4,7 +4,7 @@ import numpy as np
 import dearpygui.dearpygui as dpg
 from brainorganoid.util.abstractthread import abstractthread
 from brainorganoid.util.config import (CHANNELS_NUMBER, NUM_SAMPLE_TO_SHOW, SAMPLING_RATE, USE_MOCK_DATA, 
-                                       MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER, TIME_TO_SHOW)
+                                       MOCK_TYPE, AUTO_FIT_MODE, UNIT_MULTIPLIER, CHANNELS_PER_PORT, COM_PORT)
 
 class UiRawPlot(abstractthread):
     def __init__(self, daqThread):
@@ -20,7 +20,7 @@ class UiRawPlot(abstractthread):
 
         self.__realTimePlot = True
 
-        self.__daqThread = daqThread
+        self.__daqThreadInstances = daqThread
 
         self.__autoFitMode = AUTO_FIT_MODE
         self.__unitMultiplier = UNIT_MULTIPLIER
@@ -43,7 +43,7 @@ class UiRawPlot(abstractthread):
             dpg.add_text("Auto fit mode:")
             dpg.add_button(label="Each Channel", callback=self.toggleAutoFitMode, tag="btn_ToggleAutoFitMode", width=100)
             dpg.add_text("  |  ")
-            dpg.add_input_text(label="Sample received per second", default_value="0", enabled=False, tag="txt_SampleReceived", width=80)
+            dpg.add_input_text(label="Sample received per second", default_value="0", enabled=False, tag="txt_SampleReceived", width=160)
             dpg.add_text("  |  ")
             dpg.add_text("Unit:")
             dpg.add_button(label=self.__unit, callback=self.toggleUnitMultiplier, tag="btn_toggle_unit", width=50)
@@ -108,8 +108,10 @@ class UiRawPlot(abstractthread):
 
         if time.time() - self.starttime >= 1:
             self.starttime = time.time()
-            samples_count = self.__daqThread.getSamplesCount()
-            dpg.set_value("txt_SampleReceived", str(samples_count) + "/" + str(SAMPLING_RATE))
+            samples_count = ""
+            for i in range(len(COM_PORT)):
+                samples_count += f"{COM_PORT[i]}: {self.__daqThreadInstances[i].getSamplesCount()}, "
+            dpg.set_value("txt_SampleReceived", samples_count)
 
             self.setCursor()
 
@@ -124,7 +126,13 @@ class UiRawPlot(abstractthread):
 
     def toggleUnitMultiplier(self):
         self.__unitMultiplier = 1_000 if self.__unitMultiplier == 1_000_000 else 1_000_000
-        dpg.configure_item("btn_toggle_unit", label=self.__daqThread.setUnitMultiplier(self.__unitMultiplier))
+        daqFeedback = []
+        for i, port in enumerate(COM_PORT):
+            daqFeedback.append(self.__daqThreadInstances[i].setUnitMultiplier(self.__unitMultiplier))
+        for i, port in enumerate(COM_PORT):
+            if daqFeedback[i] == daqFeedback[0]:
+                self.__unit = daqFeedback[i]
+        dpg.configure_item("btn_toggle_unit", label=self.__unit)
 
     def fitGraph(self):
         pass
