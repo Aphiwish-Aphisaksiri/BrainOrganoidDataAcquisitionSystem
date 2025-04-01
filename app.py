@@ -117,7 +117,6 @@ class App():
             for daqIndex in range(len(COM_PORT)):
                 self.__daqInstances[daqIndex].stopThread()
                 self.__daqInstances[daqIndex].close()
-            self.__uiSettings.stopThread()
         except Exception as e:
             logging.error(f"Error stopping application: {e}")
 
